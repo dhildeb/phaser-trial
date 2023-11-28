@@ -1,3 +1,5 @@
+import { handleEnemy } from './enemy.js'
+
 let viewWidth = $(window).width()
 let viewHeight = $(window).height()
 
@@ -19,16 +21,17 @@ var config = {
   }
 };
 
-var player;
-var stars;
-var bombs;
-var platforms;
-var cursors;
-var score = 0;
-var gameOver = false;
-var scoreText;
+let player;
+export let enemy;
+let stars;
+let bombs;
+let platforms;
+let cursors;
+let score = 0;
+let gameOver = false;
+let scoreText;
 
-var game = new Phaser.Game(config);
+let game = new Phaser.Game(config);
 
 function preload() {
   this.load.image('sky', 'assets/sky.png');
@@ -36,6 +39,7 @@ function preload() {
   this.load.image('star', 'assets/star.png');
   this.load.image('bomb', 'assets/bomb.png');
   this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+  this.load.spritesheet('enemy', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
 }
 
 function create() {
@@ -48,14 +52,15 @@ function create() {
 
   //  Here we create the ground.
   //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-  platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+  platforms.create(viewWidth / 4, viewHeight + 75, 'ground').setScale(6).refreshBody();
 
   //  Now let's create some ledges
-  platforms.create(600, 400, 'ground');
-  platforms.create(50, 250, 'ground');
-  platforms.create(750, 220, 'ground');
-  platforms.create(viewWidth / 2, viewHeight, 'ground')
-  platforms.create(viewWidth * .85, viewHeight, 'ground')
+  // platforms.create(Math.random()*600, Math.random()*400, 'ground');
+  // platforms.create(Math.random()*50, Math.random()*250, 'ground');
+  // platforms.create(Math.random()*750, Math.random()*220, 'ground');
+  // platforms.create(viewWidth / 2, viewHeight, 'ground')
+  // platforms.create(viewWidth * .85, viewHeight, 'ground')
+  platforms.create(5000, 50, 'ground')
   // falsePlatforms.create(viewWidth * .75, viewWidth / 2, 'ground')
 
   // The player and its settings
@@ -117,6 +122,9 @@ function create() {
   this.physics.add.overlap(player, stars, collectStar, null, this);
 
   this.physics.add.collider(player, bombs, hitBomb, null, this);
+
+  enemy = this.physics.add.sprite(100, 450, 'enemy');
+  handleEnemy(this, platforms)
 }
 
 function update() {
@@ -124,13 +132,21 @@ function update() {
     return;
   }
 
+  // if (Math.random() * 20 > 10) {
+  //   enemy.setVelocityX(-200);
+  //   enemy.anims.play('left', true);
+  // } else {
+  //   enemy.setVelocityX(200);
+  //   enemy.anims.play('right', true);
+  // }
+
   if (cursors.left.isDown) {
-    player.setVelocityX(-250);
+    player.setVelocityX(-200);
 
     player.anims.play('left', true);
   }
   else if (cursors.right.isDown) {
-    player.setVelocityX(250);
+    player.setVelocityX(200);
 
     player.anims.play('right', true);
   }
@@ -141,7 +157,7 @@ function update() {
   }
 
   if (cursors.up.isDown && player.body.touching.down) {
-    player.setVelocityY(-500);
+    player.setVelocityY(-250);
   }
 }
 
@@ -165,7 +181,7 @@ function collectStar(player, star) {
     var bomb = bombs.create(x, 16, 'bomb');
     bomb.setBounce(1);
     bomb.setCollideWorldBounds(true);
-    bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+    bomb.setVelocity(Phaser.Math.Between(-100, 100), 20);
     bomb.allowGravity = false;
 
   }
