@@ -1,18 +1,14 @@
 import HealthBar from './HPBar.js'
+import Enemy from "./enemy.js";
 
 // Define global variables for game elements
 let player;
 let enemies = [];
-let stars;
-let bombs;
-let platforms;
 let cursors;
 let score = 0;
 let scoreText;
-let attackVisual; // Declare attack visual as a global variable
-let playerHP = 100;
+export let playerHP = 100;
 let hpBar;
-let enemyHP = 100;
 let gameOver;
 let bombVisual;
 let lastPressedKey = null;
@@ -20,7 +16,6 @@ let lastPressedKey = null;
 let viewWidth = $(window).width()
 let viewHeight = $(window).height()
 
-// Phaser configuration and scene definition
 var config = {
   type: Phaser.AUTO,
   width: viewWidth,
@@ -38,10 +33,8 @@ var config = {
   }
 };
 
-// Initialize Phaser game instance
 let game = new Phaser.Game(config);
 
-// Preload assets
 function preload() {
   this.load.image('sky', 'assets/sky.png');
   this.load.image('ground', 'assets/platform.png');
@@ -49,25 +42,19 @@ function preload() {
   this.load.image('bomb', 'assets/bomb.png');
   this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
   this.load.spritesheet('enemy', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
-  // this.load.spritesheet('attackSpriteSheet', 'assets/attack_sprite_sheet.png', { frameWidth: 64, frameHeight: 64 });
-
 }
 
-// Create game elements and setup
 function create() {
-  // Create player sprite and set physics properties
   player = this.physics.add.sprite(100, 450, 'dude');
   player.setBounce(0.2);
   player.setCollideWorldBounds(true);
 
-  // Create health bar for player and position it relative to player sprite
   hpBar = new HealthBar(this, player.x - 50, player.y - 50, playerHP);
-  // Create bomb visual sprite
-  bombVisual = this.add.sprite(0, 0, 'bomb');
-  bombVisual.setVisible(false); // Hide by default
-  bombVisual.setScale(2); // Scale as needed
 
-  // Create animations for player
+  bombVisual = this.add.sprite(0, 0, 'bomb');
+  bombVisual.setVisible(false);
+  bombVisual.setScale(2);
+
   createPlayerAnimations(this);
 
   // Set up world bounds and camera
@@ -87,8 +74,7 @@ function create() {
         break;
     }
   });
-  // Spawn initial enemies
-  spawnEnemy(this);
+  // Spawn initial enemy
   spawnEnemy(this);
 
   scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#ffffff' });
@@ -125,12 +111,14 @@ function update() {
     if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
       performAttack(this);
     }
+    enemies.forEach((enemy) => {
+      enemy.handleEnemy(this);
+    })
   }
 }
 function updateScore(score) {
   scoreText.setText('Score: ' + score);
 }
-// Function to perform player attack
 function performAttack(scene) {
   let attackRangeX = player.x;
   let attackRangeY = player.y;
@@ -159,9 +147,8 @@ function performAttack(scene) {
   // Hide bomb visual after a certain duration
   setTimeout(() => {
     bombVisual.setVisible(false);
-  }, 500); // Example: Hide after 500 milliseconds
-  // Check if enemy overlaps with attack range
-  // Check attack against each enemy in the array
+  }, 500);
+
   enemies.forEach((enemy) => {
     if (Phaser.Geom.Rectangle.ContainsPoint(enemy.getBounds(), new Phaser.Geom.Point(attackRangeX, attackRangeY))) {
       handleAttackHit(enemy, scene);
@@ -169,25 +156,12 @@ function performAttack(scene) {
   });
 }
 
-// Function to handle attack logic on enemy
 function handleAttackHit(enemy, scene) {
-  // Example: Reduce enemy health, play attack animation, etc.
-  enemy.setTint(0xff0000); // Example: Tint enemy red
-
-  setTimeout(() => {
-    enemy.clearTint(); // Remove tint after a delay
-  }, 200); // Example: Remove tint after 200 milliseconds
-
-  // Remove enemy from array or perform other logic
-  // For this example, we disable the enemy after being hit
-  enemy.disableBody(true, true); // Disable enemy
+  enemy.handleAttackHit()
   updateScore(++score);
   respawnEnemy(scene);
 }
 
-
-
-// Function to create animations for player
 function createPlayerAnimations(scene) {
   scene.anims.create({
     key: 'left',
@@ -210,73 +184,8 @@ function createPlayerAnimations(scene) {
   });
 }
 
-// Function to create animations for enemy
-function createEnemyAnimations(scene) {
-  scene.anims.create({
-    key: 'left_enemy',
-    frames: scene.anims.generateFrameNumbers('enemy', { start: 0, end: 3 }),
-    frameRate: 10,
-    repeat: -1
-  });
-
-  scene.anims.create({
-    key: 'turn_enemy',
-    frames: [{ key: 'enemy', frame: 4 }],
-    frameRate: 20
-  });
-
-  scene.anims.create({
-    key: 'right_enemy',
-    frames: scene.anims.generateFrameNumbers('enemy', { start: 5, end: 8 }),
-    frameRate: 10,
-    repeat: -1
-  });
-}
-
-// Function to handle enemy behavior
-function handleEnemy(scene, enemy, player) {
-  // Create collision between enemy and player
-  scene.physics.add.collider(enemy, player, enemyPlayerCollision, null, scene);
-
-  function updateEnemyMovement() {
-    const speed = 100;
-    const distance = Math.sqrt(Math.pow(player.x - enemy.x, 2) + Math.pow(player.y - enemy.y, 2));
-
-    // Normalize the direction vector (unit vector)
-    const directionX = (player.x - enemy.x) / distance;
-    const directionY = (player.y - enemy.y) / distance;
-
-    // Update enemy velocity based on direction towards the player
-    enemy.setVelocityX(directionX * speed);
-    enemy.setVelocityY(directionY * speed);
-
-    // Play animation based on velocity
-    if (directionX > 0) {
-      enemy.anims.play('right_enemy', true);
-    } else {
-      enemy.anims.play('left_enemy', true);
-    }
-  }
-
-  scene.events.on('update', updateEnemyMovement);
-}
-
-function enemyPlayerCollision(enemy, player, scene) {
-  // Example: Handle collision between enemy and player
-  enemy.setTint(0xff0000); // Example: Tint enemy red
-
-  setTimeout(() => {
-    enemy.clearTint(); // Remove tint after a delay
-  }, 200); // Example: Remove tint after 200 milliseconds
-
-  // Example: Reduce player health or perform other actions
-  // For this example, we'll reduce player health
-  handlePlayerDamage(scene);
-}
-
-
-function handlePlayerDamage(scene) {
-  playerHP--;
+export function handlePlayerDamage(scene, dmg) {
+  playerHP -= dmg;
   hpBar.setValue(playerHP);
   console.log('Player was hit!');
   if (playerHP <= 0) {
@@ -291,21 +200,11 @@ function handlePlayerDamage(scene) {
 function respawnEnemy(scene) {
   setTimeout(() => {
     spawnEnemy(scene);
-  }, 1000); // Example: Respawn after 1 second (adjust timing as needed)
+  }, 1000);
 }
 
-
 function spawnEnemy(scene) {
-  let newEnemy = scene.physics.add.sprite(Phaser.Math.Between(100, 700), Phaser.Math.Between(100, 300), 'enemy');
-  newEnemy.setBounce(0.2);
-  newEnemy.setCollideWorldBounds(true);
-
-  // Add animations for the enemy (if needed)
-  createEnemyAnimations(scene);
-
-  // Add enemy to the enemies array
+  let newEnemy = new Enemy(scene, player)
+  console.log(newEnemy)
   enemies.push(newEnemy);
-
-  // Handle enemy behavior
-  handleEnemy(scene, newEnemy, player);
 }
