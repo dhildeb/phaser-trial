@@ -274,14 +274,18 @@ function enemyPlayerCollision(enemy, player, scene) {
   handlePlayerDamage(scene);
 }
 
+
 function handlePlayerDamage(scene) {
-  // Example: Reduce player health or perform other actions
+  playerHP--;
+  hpBar.setValue(playerHP);
   console.log('Player was hit!');
-  // For this example, we'll end the game
-  gameOver = true;
-  updateScore('Game Over');
-  player.setTint(0xff0000);
-  player.anims.play('turn');
+  if (playerHP <= 0) {
+    gameOver = true;
+    updateScore('You Lose!')
+
+    player.setTint(0xff0000);
+    player.anims.play('turn');
+  }
 }
 
 function respawnEnemy(scene) {
