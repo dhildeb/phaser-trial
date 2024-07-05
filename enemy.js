@@ -52,7 +52,7 @@ export default class Enemy {
   createEnemyAnimations(scene) {
     scene.anims.create({
       key: 'left_enemy',
-      frames: scene.anims.generateFrameNumbers('enemy', { start: 0, end: 3 }),
+      frames: scene.anims.generateFrameNumbers('enemy', { start: 5, end: 8 }),
       frameRate: 10,
       repeat: -1
     });
@@ -65,7 +65,7 @@ export default class Enemy {
 
     scene.anims.create({
       key: 'right_enemy',
-      frames: scene.anims.generateFrameNumbers('enemy', { start: 5, end: 8 }),
+      frames: scene.anims.generateFrameNumbers('enemy', { start: 0, end: 3 }),
       frameRate: 10,
       repeat: -1
     });

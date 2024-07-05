@@ -8,6 +8,9 @@ let enemies = [];
 let cursors;
 let score = 0;
 let scoreText;
+let platforms;
+let worldBounds = { x: 2500, y: 2500 }
+
 export let playerHP = 100;
 let hpBar;
 let gameOver;
@@ -38,18 +41,24 @@ let game = new Phaser.Game(config);
 
 function preload() {
   this.load.image('sky', 'assets/sky.png');
-  this.load.image('ground', 'assets/platform.png');
+  this.load.image('platform', 'assets/platform.png');
   this.load.image('star', 'assets/star.png');
   this.load.image('bomb', 'assets/bomb.png');
   this.load.image('potion', 'assets/star.png');
   this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
-  this.load.spritesheet('enemy', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+  this.load.spritesheet('enemy', 'assets/Wisp.png', { frameWidth: 32, frameHeight: 32 });
 }
 
 function create() {
   player = this.physics.add.sprite(100, 450, 'dude');
   player.setBounce(0.2);
   player.setCollideWorldBounds(true);
+
+  platforms = this.physics.add.staticGroup();
+  // Generate platforms dynamically
+  generatePlatforms(this);
+
+  this.physics.add.collider(player, platforms);
 
   hpBar = new HealthBar(this, player.x - 50, player.y - 50, playerHP);
 
@@ -60,8 +69,8 @@ function create() {
   createPlayerAnimations(this);
 
   // Set up world bounds and camera
-  this.physics.world.setBounds(0, 0, 14000, 10000);
-  this.cameras.main.setBounds(0, 0, 14000, 10000);
+  this.physics.world.setBounds(0, 0, worldBounds.x, worldBounds.y);
+  this.cameras.main.setBounds(0, 0, worldBounds.x, worldBounds.y);
   this.cameras.main.startFollow(player);
 
   // Input events
@@ -81,7 +90,16 @@ function create() {
 
   scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#ffffff' });
   scoreText.setScrollFactor(0);
-
+  // Function to generate platforms dynamically
+  function generatePlatforms(scene) {
+    // Example pattern for generating platforms
+    for (let i = 0; i < 20; i++) {
+      let x = Phaser.Math.Between(0, worldBounds.x); // Random x position within world bounds
+      let y = Phaser.Math.Between(0, worldBounds.y); // Random y position within world bounds
+      let platform = platforms.create(x, y, 'platform');
+      platform.setScale(2, 2).refreshBody(); // Adjust the scale and refresh body
+    }
+  }
 }
 
 // Update function called every frame
@@ -199,7 +217,6 @@ function createPlayerAnimations(scene) {
 export function handlePlayerDamage(scene, dmg) {
   playerHP -= dmg;
   hpBar.setValue(playerHP);
-  console.log('Player was hit!');
   if (playerHP <= 0) {
     gameOver = true;
     updateScore('You Lose!')
@@ -217,6 +234,5 @@ function respawnEnemy(scene) {
 
 function spawnEnemy(scene) {
   let newEnemy = new Enemy(scene, player)
-  console.log(newEnemy)
   enemies.push(newEnemy);
 }
