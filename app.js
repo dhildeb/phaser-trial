@@ -1,5 +1,6 @@
 import HealthBar from './HPBar.js'
 import Enemy from "./enemy.js";
+import Potion from "./Item.js";
 
 // Define global variables for game elements
 let player;
@@ -40,6 +41,7 @@ function preload() {
   this.load.image('ground', 'assets/platform.png');
   this.load.image('star', 'assets/star.png');
   this.load.image('bomb', 'assets/bomb.png');
+  this.load.image('potion', 'assets/star.png');
   this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
   this.load.spritesheet('enemy', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
 }
@@ -157,8 +159,18 @@ function performAttack(scene) {
 }
 
 function handleAttackHit(enemy, scene) {
+
   enemy.handleAttackHit()
   updateScore(++score);
+  if (Math.random() < 0.3) {
+    let potion = new Potion(scene, enemy.enemy.x, enemy.enemy.y);
+    scene.physics.add.overlap(player, potion, () => {
+      const newHP = potion.collect() + playerHP;
+      hpBar.setValue(newHP > 100 ? 100 : newHP);
+      playerHP = newHP > 100 ? 100 : newHP;
+    }, null, scene);
+  }
+
   respawnEnemy(scene);
 }
 
