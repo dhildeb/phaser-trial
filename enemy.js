@@ -1,16 +1,22 @@
-import { handlePlayerDamage } from './app.js';
+import { enemies, handlePlayerDamage, playerDmg } from './app.js';
+import { generateRandomID } from "./util.js";
 
 export default class Enemy {
-  constructor(scene, player, speed, dmg) {
+  constructor(scene, player, hp, speed, dmg) {
+    this.id = generateRandomID();
     this.enemy = scene.physics.add.sprite(Phaser.Math.Between(100, 700), Phaser.Math.Between(100, 300), 'enemy');
     this.enemy.setBounce(0.2);
     this.enemy.setCollideWorldBounds(true);
     this.player = player;
     this.speed = speed || 100;
     this.dmg = dmg || 1;
-    this.scene = scene
+    this.scene = scene;
+    this.hp = hp || 1;
 
     this.createEnemyAnimations(scene);
+
+    // Bind the event handler to this instance
+    this.updateEnemyMovement = this.updateEnemyMovement.bind(this);
 
     this.handleEnemy(scene);
   }
@@ -22,31 +28,28 @@ export default class Enemy {
   handleEnemy(scene) {
     scene.physics.add.collider(this.enemy, this.player, this.enemyPlayerCollision, null, scene);
 
-    const updateEnemyMovement = () => {
-      const distance = Math.sqrt(Math.pow(this.player.x - this.enemy.x, 2) + Math.pow(this.player.y - this.enemy.y, 2));
+    // Add the event listener and store a reference to it
+    this.updateListener = scene.events.on('update', this.updateEnemyMovement, this);
+  }
 
-      const directionX = (this.player.x - this.enemy.x) / distance;
-      const directionY = (this.player.y - this.enemy.y) / distance;
+  updateEnemyMovement() {
+    const distance = Math.sqrt(Math.pow(this.player.x - this.enemy.x, 2) + Math.pow(this.player.y - this.enemy.y, 2));
 
-      this.enemy.setVelocityX(directionX * this.speed);
-      this.enemy.setVelocityY(directionY * this.speed);
+    const directionX = (this.player.x - this.enemy.x) / distance;
+    const directionY = (this.player.y - this.enemy.y) / distance;
 
-      if (directionX > 0) {
-        this.enemy.anims.play('right_enemy', true);
-      } else {
-        this.enemy.anims.play('left_enemy', true);
-      }
-    };
+    this.enemy.setVelocityX(directionX * this.speed);
+    this.enemy.setVelocityY(directionY * this.speed);
 
-    scene.events.on('update', updateEnemyMovement, this);
+    if (directionX > 0) {
+      this.enemy.anims.play('right_enemy', true);
+    } else {
+      this.enemy.anims.play('left_enemy', true);
+    }
   }
 
   enemyPlayerCollision = () => {
     handlePlayerDamage(this.scene, this.dmg);
-  }
-
-  destroy() {
-    this.enemy.destroy();
   }
 
   createEnemyAnimations(scene) {
@@ -70,6 +73,7 @@ export default class Enemy {
       repeat: -1
     });
   }
+
   handleAttackHit() {
     this.enemy.setTint(0xff0000);
 
@@ -77,6 +81,18 @@ export default class Enemy {
       this.enemy.clearTint();
     }, 200);
 
-    this.enemy.disableBody(true, true);
+    this.hp -= playerDmg;
+
+    if (this.hp < 1) {
+      const index = enemies.findIndex((enemy) => enemy.id === this.id);
+      enemies.splice(index, 1);
+
+      // Remove the specific event listener
+      this.scene.events.off('update', this.updateEnemyMovement, this);
+
+      this.enemy.destroy();
+      return true;
+    }
+    return false;
   }
 }

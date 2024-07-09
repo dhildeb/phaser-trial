@@ -4,7 +4,8 @@ import Potion from "./Item.js";
 
 // Define global variables for game elements
 let player;
-let enemies = [];
+export let playerDmg = 3;
+export let enemies = [];
 let cursors;
 let score = 0;
 let scoreText;
@@ -131,8 +132,12 @@ function update() {
     if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
       performAttack(this);
     }
-    enemies.forEach((enemy) => {
-      enemy.handleEnemy(this);
+    enemies.forEach((enemy, index) => {
+      if (enemy && enemy.enemy) {
+        enemy.handleEnemy(this);
+      } else {
+        enemies.splice(index, 1);
+      }
     })
   }
 }
@@ -168,8 +173,10 @@ function performAttack(scene) {
   setTimeout(() => {
     bombVisual.setVisible(false);
   }, 500);
-
   enemies.forEach((enemy) => {
+    if (!enemy || !enemy.enemy) {
+      return;
+    }
     if (Phaser.Geom.Rectangle.ContainsPoint(enemy.getBounds(), new Phaser.Geom.Point(attackRangeX, attackRangeY))) {
       handleAttackHit(enemy, scene);
     }
@@ -178,7 +185,10 @@ function performAttack(scene) {
 
 function handleAttackHit(enemy, scene) {
 
-  enemy.handleAttackHit()
+  const isDead = enemy.handleAttackHit()
+  if (!isDead) {
+    return;
+  }
   updateScore(++score);
   if (Math.random() < 0.3) {
     let potion = new Potion(scene, enemy.enemy.x, enemy.enemy.y);
@@ -187,6 +197,7 @@ function handleAttackHit(enemy, scene) {
       hpBar.setValue(newHP > 100 ? 100 : newHP);
       playerHP = newHP > 100 ? 100 : newHP;
     }, null, scene);
+    spawnEnemy(scene);
   }
 
   respawnEnemy(scene);
@@ -219,7 +230,7 @@ export function handlePlayerDamage(scene, dmg) {
   hpBar.setValue(playerHP);
   if (playerHP <= 0) {
     gameOver = true;
-    updateScore('You Lose!')
+    updateScore('You Lose!');
 
     player.setTint(0xff0000);
     player.anims.play('turn');
@@ -233,6 +244,6 @@ function respawnEnemy(scene) {
 }
 
 function spawnEnemy(scene) {
-  let newEnemy = new Enemy(scene, player)
+  let newEnemy = new Enemy(scene, player, 5)
   enemies.push(newEnemy);
 }
