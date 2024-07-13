@@ -1,10 +1,10 @@
-import { enemies, handlePlayerDamage, playerDmg } from './app.js';
-import { generateRandomID } from "./util.js";
+import { enemies, handlePlayerDamage, playerDmg, worldBounds } from '../app.js';
+import { generateRandomID } from "../util.js";
 
 export default class Enemy {
   constructor(scene, player, hp, speed, dmg) {
     this.id = generateRandomID();
-    this.enemy = scene.physics.add.sprite(Phaser.Math.Between(100, 700), Phaser.Math.Between(100, 300), 'enemy');
+    this.enemy = scene.physics.add.sprite(Phaser.Math.Between(100, worldBounds.x), Phaser.Math.Between(100, worldBounds.y), 'enemy');
     this.enemy.setBounce(0.2);
     this.enemy.setCollideWorldBounds(true);
     this.player = player;
@@ -13,12 +13,15 @@ export default class Enemy {
     this.scene = scene;
     this.hp = hp || 1;
 
-    this.createEnemyAnimations(scene);
+    this.configureEnemy()
+  }
 
-    // Bind the event handler to this instance
+  configureEnemy() {
+    this.createEnemyAnimations(this.scene);
+
     this.updateEnemyMovement = this.updateEnemyMovement.bind(this);
 
-    this.handleEnemy(scene);
+    this.handleEnemy(this.scene);
   }
 
   getBounds() {
@@ -27,8 +30,6 @@ export default class Enemy {
 
   handleEnemy(scene) {
     scene.physics.add.collider(this.enemy, this.player, this.enemyPlayerCollision, null, scene);
-
-    // Add the event listener and store a reference to it
     this.updateListener = scene.events.on('update', this.updateEnemyMovement, this);
   }
 
@@ -40,7 +41,6 @@ export default class Enemy {
 
     this.enemy.setVelocityX(directionX * this.speed);
     this.enemy.setVelocityY(directionY * this.speed);
-
     if (directionX > 0) {
       this.enemy.anims.play('right_enemy', true);
     } else {
@@ -53,6 +53,7 @@ export default class Enemy {
   }
 
   createEnemyAnimations(scene) {
+    console.log('base moves')
     scene.anims.create({
       key: 'left_enemy',
       frames: scene.anims.generateFrameNumbers('enemy', { start: 5, end: 8 }),
@@ -87,7 +88,6 @@ export default class Enemy {
       const index = enemies.findIndex((enemy) => enemy.id === this.id);
       enemies.splice(index, 1);
 
-      // Remove the specific event listener
       this.scene.events.off('update', this.updateEnemyMovement, this);
 
       this.enemy.destroy();

@@ -1,6 +1,7 @@
 import HealthBar from './HPBar.js'
-import Enemy from "./enemy.js";
+import Enemy from "./Enemies/enemy.js";
 import Potion from "./Item.js";
+import skeleton from "./Enemies/Skeleton.js";
 
 // Define global variables for game elements
 let player;
@@ -10,7 +11,7 @@ let cursors;
 let score = 0;
 let scoreText;
 let platforms;
-let worldBounds = { x: 2500, y: 2500 }
+export let worldBounds = { x: 2500, y: 2500 }
 
 export let playerHP = 100;
 let hpBar;
@@ -47,6 +48,7 @@ function preload() {
   this.load.image('bomb', 'assets/bomb.png');
   this.load.image('potion', 'assets/star.png');
   this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+  this.load.spritesheet('skeleton', 'assets/skeleton.png', { frameWidth: 64, frameHeight: 64 });
   this.load.spritesheet('enemy', 'assets/Wisp.png', { frameWidth: 32, frameHeight: 32 });
 }
 
@@ -87,7 +89,7 @@ function create() {
     }
   });
   // Spawn initial enemy
-  spawnEnemy(this);
+  enemies.push(new Enemy(this, player, 3, 100, 1));
 
   scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#ffffff' });
   scoreText.setScrollFactor(0);
@@ -197,7 +199,7 @@ function handleAttackHit(enemy, scene) {
       hpBar.setValue(newHP > 100 ? 100 : newHP);
       playerHP = newHP > 100 ? 100 : newHP;
     }, null, scene);
-    spawnEnemy(scene);
+    enemies.push(new skeleton(scene, player, 25, 75, 5))
   }
 
   respawnEnemy(scene);
@@ -239,11 +241,6 @@ export function handlePlayerDamage(scene, dmg) {
 
 function respawnEnemy(scene) {
   setTimeout(() => {
-    spawnEnemy(scene);
+    enemies.push(new Enemy(scene, player, 3, 100, 1))
   }, 1000);
-}
-
-function spawnEnemy(scene) {
-  let newEnemy = new Enemy(scene, player, 5)
-  enemies.push(newEnemy);
 }
