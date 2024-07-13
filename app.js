@@ -1,21 +1,27 @@
 import HealthBar from './HPBar.js'
 import Enemy from "./Enemies/enemy.js";
-import Potion from "./Item.js";
 import skeleton from "./Enemies/Skeleton.js";
+import { directionAngles } from "./utils/constants.js";
 
 // Define global variables for game elements
 let player;
-export let playerDmg = 3;
+export let playerDmg = 2;
+export const setPlayerDmg = (dmg) => { playerDmg = dmg }
 export let enemies = [];
 let cursors;
 let score = 0;
 let scoreText;
-let platforms;
+let tombstones;
+let allTombstones = [];
 export let worldBounds = { x: 2500, y: 2500 }
 
 export let hpBar;
 let gameOver;
-let bombVisual;
+let attackVisual;
+export const setWeapon = (wep, scaleX = 1, scaleY = 1) => {
+  attackVisual.setTexture(wep)
+  attackVisual.setScale(scaleX, scaleY)
+}
 let lastPressedKey = null;
 
 let viewWidth = $(window).width()
@@ -42,7 +48,7 @@ let game = new Phaser.Game(config);
 
 function preload() {
   this.load.image('sky', 'assets/sky.png');
-  this.load.image('platform', 'assets/platform.png');
+  this.load.image('tombstone', 'assets/tombstone.png');
   this.load.image('star', 'assets/star.png');
   this.load.image('bomb', 'assets/bomb.png');
   this.load.image('potion', 'assets/star.png');
@@ -57,17 +63,17 @@ function create() {
   player.setBounce(0.2);
   player.setCollideWorldBounds(true);
 
-  platforms = this.physics.add.staticGroup();
-  // Generate platforms dynamically
-  generatePlatforms(this);
+  tombstones = this.physics.add.staticGroup();
+  // Generate tombstones dynamically
+  generatetombstones();
 
-  this.physics.add.collider(player, platforms);
+  this.physics.add.collider(player, tombstones);
 
   hpBar = new HealthBar(this, player.x - 50, player.y - 50, 100);
 
-  bombVisual = this.add.sprite(0, 0, 'bomb');
-  bombVisual.setVisible(false);
-  bombVisual.setScale(2);
+  attackVisual = this.add.sprite(0, 0, 'bomb');
+  attackVisual.setVisible(false);
+  attackVisual.setScale(2);
 
   createPlayerAnimations(this);
 
@@ -88,19 +94,21 @@ function create() {
         break;
     }
   });
+
   // Spawn initial enemy
   enemies.push(new Enemy(this, player, 3, 100, 1));
 
   scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#ffffff' });
   scoreText.setScrollFactor(0);
-  // Function to generate platforms dynamically
-  function generatePlatforms(scene) {
-    // Example pattern for generating platforms
+  // Function to generate tombstones dynamically
+  function generatetombstones() {
+    // Example pattern for generating tombstones
     for (let i = 0; i < 20; i++) {
       let x = Phaser.Math.Between(0, worldBounds.x); // Random x position within world bounds
       let y = Phaser.Math.Between(0, worldBounds.y); // Random y position within world bounds
-      let platform = platforms.create(x, y, 'platform');
-      platform.setScale(2, 2).refreshBody(); // Adjust the scale and refresh body
+      let tombstone = tombstones.create(x, y, 'tombstone');
+      tombstone.setScale(0.1, 0.1).refreshBody(); // Adjust the scale and refresh body
+      allTombstones.push(tombstone);
     }
   }
 }
@@ -168,12 +176,13 @@ function performAttack(scene) {
   }
 
   // Show bomb visual at player position
-  bombVisual.setPosition(attackRangeX, attackRangeY);
-  bombVisual.setVisible(true);
-
+  attackVisual.setPosition(attackRangeX, attackRangeY);
+  attackVisual.setVisible(true);
+  const angle = directionAngles[lastPressedKey] || 0;
+  attackVisual.setAngle(angle);
   // Hide bomb visual after a certain duration
   setTimeout(() => {
-    bombVisual.setVisible(false);
+    attackVisual.setVisible(false);
   }, 500);
   enemies.forEach((enemy) => {
     if (!enemy || !enemy.enemy) {
@@ -181,6 +190,14 @@ function performAttack(scene) {
     }
     if (Phaser.Geom.Rectangle.ContainsPoint(enemy.getBounds(), new Phaser.Geom.Point(attackRangeX, attackRangeY))) {
       handleAttackHit(enemy, scene);
+    }
+  });
+  tombstones.getChildren().forEach((tombstone) => {
+    if (attackVisual.frame.texture.key !== 'shovel') {
+      return;
+    }
+    if (Phaser.Geom.Intersects.RectangleToRectangle(attackVisual.getBounds(), tombstone.getBounds())) {
+      handleTombstoneHit(tombstone);
     }
   });
 }
@@ -193,13 +210,6 @@ function handleAttackHit(enemy, scene) {
   }
   updateScore(++score);
   if (Math.random() < 0.3) {
-
-    // let potion = new Potion(scene, enemy.enemy.x, enemy.enemy.y);
-    // scene.physics.add.overlap(player, potion, () => {
-    //   const newHP = potion.collect() + playerHP;
-    //   hpBar.setValue(newHP > 100 ? 100 : newHP);
-    //   playerHP = newHP > 100 ? 100 : newHP;
-    // }, null, scene);
     enemies.push(new skeleton(scene, player, 25, 75, 5))
   }
 
@@ -243,4 +253,20 @@ function respawnEnemy(scene) {
   setTimeout(() => {
     enemies.push(new Enemy(scene, player, 3, 100, 1))
   }, 1000);
+}
+
+function handleTombstoneHit(tombstone) {
+  const index = allTombstones.indexOf(tombstone);
+  tombstone.destroy()
+  if (index > -1) {
+    allTombstones.splice(index, 1);
+  }
+  if (allTombstones.length <= 0) {
+    handleVictory()
+  }
+}
+
+function handleVictory() {
+  gameOver = true;
+  updateScore('You Win!');
 }

@@ -1,3 +1,5 @@
+import Item from "../Item.js";
+import { playerDmg, setPlayerDmg, setWeapon } from "../app.js";
 import Enemy from './enemy.js'
 export default class skeleton extends Enemy {
   constructor(scene, player, hp, speed, dmg) {
@@ -48,6 +50,20 @@ export default class skeleton extends Enemy {
         frameRate: 10,
         repeat: -1
       });
+    }
+  }
+
+  handleDrop() {
+    if (Math.random() < 0.5) {
+      let shovel = new Item(this.scene, this.enemy.x, this.enemy.y, 'shovel', 5);
+      shovel.setScale(24 / shovel.width);
+      this.scene.physics.add.overlap(this.player, shovel, () => {
+        let upgrade = shovel.collect()
+        if (playerDmg < 5) {
+          setPlayerDmg(upgrade);
+          setWeapon('shovel', 0.006857, 0.006857)
+        }
+      }, null, this.scene);
     }
   }
 }

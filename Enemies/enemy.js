@@ -1,6 +1,6 @@
 import { enemies, handlePlayerDamage, playerDmg, worldBounds, hpBar } from '../app.js';
 import { generateRandomID } from "../util.js";
-import Potion from "../Item.js";
+import Item from "../Item.js";
 
 export default class Enemy {
   constructor(scene, player, hp, speed, dmg) {
@@ -91,15 +91,19 @@ export default class Enemy {
       this.scene.events.off('update', this.updateEnemyMovement, this);
 
       this.enemy.destroy();
-      if (Math.random() < 0.3) {
-        let potion = new Potion(this.scene, this.enemy.x, this.enemy.y);
-        this.scene.physics.add.overlap(this.player, potion, () => {
-          const newHP = potion.collect() + hpBar.value;
-          hpBar.setValue(newHP > 100 ? 100 : newHP);
-        }, null, this.scene);
-      }
+      this.handleDrop();
       return true;
     }
     return false;
+  }
+
+  handleDrop() {
+    if (Math.random() < 0.3) {
+      let potion = new Item(this.scene, this.enemy.x, this.enemy.y, 'potion', 5);
+      this.scene.physics.add.overlap(this.player, potion, () => {
+        const newHP = potion.collect() + hpBar.value;
+        hpBar.setValue(newHP > 100 ? 100 : newHP);
+      }, null, this.scene);
+    }
   }
 }
