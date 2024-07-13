@@ -2,6 +2,7 @@ export default class HealthBar extends Phaser.GameObjects.Container {
   constructor(scene, x, y, value) {
     super(scene, x, y);
     this.scene = scene;
+    this.value = value;
 
     // Create the background of the health bar (gray bar)
     this.bg = new Phaser.GameObjects.Graphics(scene);
@@ -25,6 +26,7 @@ export default class HealthBar extends Phaser.GameObjects.Container {
 
   // Update the health bar based on the current value
   setValue(value) {
-    this.bar.scaleX = Phaser.Math.Clamp(value / 100, 0, 1); // Scale bar width based on value
+    this.bar.scaleX = Phaser.Math.Clamp(value / 100, 0, 1);
+    this.value = value
   }
 }

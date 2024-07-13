@@ -42,7 +42,6 @@ export default class skeleton extends Enemy {
     for (let row = 0; row < 4; row++) {
       const startFrame = row * 9;
       const endFrame = startFrame + 8;
-      console.log(`${row}_move`)
       scene.anims.create({
         key: `${row}_move`,
         frames: scene.anims.generateFrameNumbers('skeleton', { start: startFrame, end: endFrame }),

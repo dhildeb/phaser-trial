@@ -13,8 +13,7 @@ let scoreText;
 let platforms;
 export let worldBounds = { x: 2500, y: 2500 }
 
-export let playerHP = 100;
-let hpBar;
+export let hpBar;
 let gameOver;
 let bombVisual;
 let lastPressedKey = null;
@@ -47,6 +46,7 @@ function preload() {
   this.load.image('star', 'assets/star.png');
   this.load.image('bomb', 'assets/bomb.png');
   this.load.image('potion', 'assets/star.png');
+  this.load.image('shovel', 'assets/shovel.png');
   this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
   this.load.spritesheet('skeleton', 'assets/skeleton.png', { frameWidth: 64, frameHeight: 64 });
   this.load.spritesheet('enemy', 'assets/Wisp.png', { frameWidth: 32, frameHeight: 32 });
@@ -63,7 +63,7 @@ function create() {
 
   this.physics.add.collider(player, platforms);
 
-  hpBar = new HealthBar(this, player.x - 50, player.y - 50, playerHP);
+  hpBar = new HealthBar(this, player.x - 50, player.y - 50, 100);
 
   bombVisual = this.add.sprite(0, 0, 'bomb');
   bombVisual.setVisible(false);
@@ -193,12 +193,13 @@ function handleAttackHit(enemy, scene) {
   }
   updateScore(++score);
   if (Math.random() < 0.3) {
-    let potion = new Potion(scene, enemy.enemy.x, enemy.enemy.y);
-    scene.physics.add.overlap(player, potion, () => {
-      const newHP = potion.collect() + playerHP;
-      hpBar.setValue(newHP > 100 ? 100 : newHP);
-      playerHP = newHP > 100 ? 100 : newHP;
-    }, null, scene);
+
+    // let potion = new Potion(scene, enemy.enemy.x, enemy.enemy.y);
+    // scene.physics.add.overlap(player, potion, () => {
+    //   const newHP = potion.collect() + playerHP;
+    //   hpBar.setValue(newHP > 100 ? 100 : newHP);
+    //   playerHP = newHP > 100 ? 100 : newHP;
+    // }, null, scene);
     enemies.push(new skeleton(scene, player, 25, 75, 5))
   }
 
@@ -228,9 +229,8 @@ function createPlayerAnimations(scene) {
 }
 
 export function handlePlayerDamage(scene, dmg) {
-  playerHP -= dmg;
-  hpBar.setValue(playerHP);
-  if (playerHP <= 0) {
+  hpBar.setValue(hpBar.value - dmg);
+  if (hpBar.value <= 0) {
     gameOver = true;
     updateScore('You Lose!');
 
