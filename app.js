@@ -14,10 +14,11 @@ let scoreText;
 let tombstones;
 let allTombstones = [];
 export let worldBounds = { x: 2500, y: 2500 }
+let pressedKeys = {};
 
 export let hpBar;
 let gameOver;
-let attackVisual;
+export let attackVisual;
 export const setWeapon = (wep, scaleX = 1, scaleY = 1) => {
   attackVisual.setTexture(wep)
   attackVisual.setScale(scaleX, scaleY)
@@ -50,7 +51,7 @@ function preload() {
   this.load.image('sky', 'assets/sky.png');
   this.load.image('tombstone', 'assets/tombstone.png');
   this.load.image('star', 'assets/star.png');
-  this.load.image('bomb', 'assets/bomb.png');
+  this.load.image('rock', 'assets/rock.png');
   this.load.image('potion', 'assets/star.png');
   this.load.image('shovel', 'assets/shovel.png');
   this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
@@ -64,20 +65,18 @@ function create() {
   player.setCollideWorldBounds(true);
 
   tombstones = this.physics.add.staticGroup();
-  // Generate tombstones dynamically
   generatetombstones();
 
   this.physics.add.collider(player, tombstones);
 
   hpBar = new HealthBar(this, player.x - 50, player.y - 50, 100);
 
-  attackVisual = this.add.sprite(0, 0, 'bomb');
+  attackVisual = this.add.sprite(0, 0, 'rock');
   attackVisual.setVisible(false);
-  attackVisual.setScale(2);
+  attackVisual.setScale(.05);
 
   createPlayerAnimations(this);
 
-  // Set up world bounds and camera
   this.physics.world.setBounds(0, 0, worldBounds.x, worldBounds.y);
   this.cameras.main.setBounds(0, 0, worldBounds.x, worldBounds.y);
   this.cameras.main.startFollow(player);
@@ -90,7 +89,19 @@ function create() {
       case 'ArrowDown':
       case 'ArrowLeft':
       case 'ArrowRight':
-        lastPressedKey = event.code; // Update last pressed key
+        pressedKeys[event.code] = true;
+        break;
+    }
+  });
+
+  // Use the 'keyup' event to remove released arrow keys from pressedKeys
+  this.input.keyboard.on('keyup', function (event) {
+    switch (event.code) {
+      case 'ArrowUp':
+      case 'ArrowDown':
+      case 'ArrowLeft':
+      case 'ArrowRight':
+        delete pressedKeys[event.code]; // Remove released keys
         break;
     }
   });
@@ -100,45 +111,22 @@ function create() {
 
   scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#ffffff' });
   scoreText.setScrollFactor(0);
-  // Function to generate tombstones dynamically
   function generatetombstones() {
-    // Example pattern for generating tombstones
     for (let i = 0; i < 20; i++) {
-      let x = Phaser.Math.Between(0, worldBounds.x); // Random x position within world bounds
-      let y = Phaser.Math.Between(0, worldBounds.y); // Random y position within world bounds
+      let x = Phaser.Math.Between(0, worldBounds.x);
+      let y = Phaser.Math.Between(0, worldBounds.y);
       let tombstone = tombstones.create(x, y, 'tombstone');
-      tombstone.setScale(0.1, 0.1).refreshBody(); // Adjust the scale and refresh body
+      tombstone.setScale(0.1, 0.1).refreshBody();
       allTombstones.push(tombstone);
     }
   }
 }
 
-// Update function called every frame
 function update() {
 
   hpBar.setPosition(player.x - 50, player.y - 50);
-  // Check for input events
   if (!gameOver) {
-    if (cursors.left.isDown) {
-      player.setVelocityX(-200);
-      player.anims.play('left', true);
-    } else if (cursors.right.isDown) {
-      player.setVelocityX(200);
-      player.anims.play('right', true);
-    } else {
-      player.setVelocityX(0);
-      player.anims.play('turn');
-    }
-
-    if (cursors.up.isDown) {
-      player.setVelocityY(-200);
-    } else if (cursors.down.isDown) {
-      player.setVelocityY(200);
-    } else {
-      player.setVelocityY(0);
-    }
-
-    // Check for spacebar input to perform attack
+    handlePlayerMovement();
     if (Phaser.Input.Keyboard.JustDown(cursors.space)) {
       performAttack(this);
     }
@@ -151,6 +139,17 @@ function update() {
     })
   }
 }
+function movePlayer(velocityX, velocityY, direction) {
+  player.setVelocityX(velocityX);
+  player.setVelocityY(velocityY);
+  if (direction) {
+    player.anims.play(direction, true);
+    lastPressedKey = direction; // Update last pressed direction
+  } else {
+    player.setVelocity(0); // Stop the player if no keys are pressed
+    player.anims.play('turn');
+  }
+}
 function updateScore(score) {
   scoreText.setText('Score: ' + score);
 }
@@ -158,29 +157,44 @@ function performAttack(scene) {
   let attackRangeX = player.x;
   let attackRangeY = player.y;
 
-
-  // Define attack range in front of the player
   switch (lastPressedKey) {
-    case 'ArrowUp':
-      attackRangeY -= 50
-      break
-    case 'ArrowDown':
-      attackRangeY += 50
-      break
-    case 'ArrowLeft':
-      attackRangeX -= 50
-      break
-    case 'ArrowRight':
-      attackRangeX += 50
-      break
+    case 'up':
+      attackRangeY -= 50;
+      break;
+    case 'down':
+      attackRangeY += 50;
+      break;
+    case 'left':
+      attackRangeX -= 50;
+      break;
+    case 'right':
+      attackRangeX += 50;
+      break;
+    case 'upleft':
+      attackRangeX -= 50;
+      attackRangeY -= 50;
+      break;
+    case 'upright':
+      attackRangeX += 50;
+      attackRangeY -= 50;
+      break;
+    case 'downleft':
+      attackRangeX -= 50;
+      attackRangeY += 50;
+      break;
+    case 'downright':
+      attackRangeX += 50;
+      attackRangeY += 50;
+      break;
+    default:
+      // If no valid direction, do nothing
+      return;
   }
 
-  // Show bomb visual at player position
   attackVisual.setPosition(attackRangeX, attackRangeY);
   attackVisual.setVisible(true);
   const angle = directionAngles[lastPressedKey] || 0;
   attackVisual.setAngle(angle);
-  // Hide bomb visual after a certain duration
   setTimeout(() => {
     attackVisual.setVisible(false);
   }, 500);
@@ -236,6 +250,34 @@ function createPlayerAnimations(scene) {
     frameRate: 10,
     repeat: -1
   });
+}
+
+// Function to handle player movement based on pressed keys
+function handlePlayerMovement() {
+  let velocityX = 0;
+  let velocityY = 0;
+  let direction = '';
+
+  // Determine movement direction based on pressed keys
+  if (pressedKeys['ArrowUp']) {
+    velocityY = -200;
+    direction += 'up';
+  }
+  if (pressedKeys['ArrowDown']) {
+    velocityY = 200;
+    direction += 'down';
+  }
+  if (pressedKeys['ArrowLeft']) {
+    velocityX = -200;
+    direction += 'left';
+  }
+  if (pressedKeys['ArrowRight']) {
+    velocityX = 200;
+    direction += 'right';
+  }
+
+  // Move player and play animation based on direction
+  movePlayer(velocityX, velocityY, direction);
 }
 
 export function handlePlayerDamage(scene, dmg) {

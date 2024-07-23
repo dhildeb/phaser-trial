@@ -14,6 +14,9 @@ export default class Enemy {
     this.scene = scene;
     this.hp = hp || 1;
 
+    this.enemy.body.setSize(this.enemy.width - 25, this.enemy.height - 25);
+
+
     this.configureEnemy()
   }
 

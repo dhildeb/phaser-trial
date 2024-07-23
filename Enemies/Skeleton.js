@@ -1,5 +1,5 @@
 import Item from "../Item.js";
-import { playerDmg, setPlayerDmg, setWeapon } from "../app.js";
+import { playerDmg, setPlayerDmg, setWeapon, attackVisual, hpBar } from "../app.js";
 import Enemy from './enemy.js'
 export default class skeleton extends Enemy {
   constructor(scene, player, hp, speed, dmg) {
@@ -54,7 +54,7 @@ export default class skeleton extends Enemy {
   }
 
   handleDrop() {
-    if (Math.random() < 0.5) {
+    if (Math.random() < 0.5 && attackVisual.frame.texture.key !== 'shovel') {
       let shovel = new Item(this.scene, this.enemy.x, this.enemy.y, 'shovel', 5);
       shovel.setScale(24 / shovel.width);
       this.scene.physics.add.overlap(this.player, shovel, () => {
@@ -63,6 +63,12 @@ export default class skeleton extends Enemy {
           setPlayerDmg(upgrade);
           setWeapon('shovel', 0.006857, 0.006857)
         }
+      }, null, this.scene);
+    } else {
+      let potion = new Item(this.scene, this.enemy.x, this.enemy.y, 'potion', 10);
+      this.scene.physics.add.overlap(this.player, potion, () => {
+        const newHP = potion.collect() + hpBar.value;
+        hpBar.setValue(newHP > 100 ? 100 : newHP);
       }, null, this.scene);
     }
   }
