@@ -1,9 +1,10 @@
+import Enemy from './enemy.js';
 import Item from "../Item.js";
-import { playerDmg, setPlayerDmg, setWeapon, attackVisual, hpBar } from "../app.js";
-import Enemy from './enemy.js'
+import { player } from "../player.js";
+
 export default class skeleton extends Enemy {
-  constructor(scene, player, hp, speed, dmg) {
-    super(scene, player, hp, speed, dmg)
+  constructor(scene, hp, speed, dmg) {
+    super(scene, hp, speed, dmg)
   }
 
   configureEnemy() {
@@ -15,8 +16,8 @@ export default class skeleton extends Enemy {
   }
 
   updateEnemyMovement() {
-    const dx = this.player.x - this.enemy.x;
-    const dy = this.player.y - this.enemy.y;
+    const dx = player.character.x - this.enemy.x;
+    const dy = player.character.y - this.enemy.y;
 
     const distance = Math.sqrt(dx * dx + dy * dy);
 
@@ -54,21 +55,21 @@ export default class skeleton extends Enemy {
   }
 
   handleDrop() {
-    if (Math.random() < 0.5 && attackVisual.frame.texture.key !== 'shovel') {
+    if (Math.random() < 0.5 && player.attackVisual.frame.texture.key !== 'shovel') {
       let shovel = new Item(this.scene, this.enemy.x, this.enemy.y, 'shovel', 5);
       shovel.setScale(24 / shovel.width);
-      this.scene.physics.add.overlap(this.player, shovel, () => {
+      this.scene.physics.add.overlap(player.character, shovel, () => {
         let upgrade = shovel.collect()
-        if (playerDmg < 5) {
-          setPlayerDmg(upgrade);
-          setWeapon('shovel', 0.006857, 0.006857)
+        if (player.dmg < 5) {
+          player.setDmg(upgrade);
+          player.setWeapon('shovel', 0.006857, 0.006857)
         }
       }, null, this.scene);
     } else {
-      let potion = new Item(this.scene, this.enemy.x, this.enemy.y, 'potion', 10);
-      this.scene.physics.add.overlap(this.player, potion, () => {
-        const newHP = potion.collect() + hpBar.value;
-        hpBar.setValue(newHP > 100 ? 100 : newHP);
+      let potion = new Item(this.scene, this.enemy.x, this.enemy.y, 'potion', 50);
+      this.scene.physics.add.overlap(player.character, potion, () => {
+        const newHP = potion.collect() + player.hpBar.value;
+        player.hpBar.setValue(newHP > 100 ? 100 : newHP);
       }, null, this.scene);
     }
   }

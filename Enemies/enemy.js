@@ -1,14 +1,14 @@
-import { enemies, handlePlayerDamage, playerDmg, worldBounds, hpBar } from '../app.js';
+import { enemies, worldBounds } from '../app.js';
 import { generateRandomID } from "../util.js";
 import Item from "../Item.js";
+import { player } from "../player.js";
 
 export default class Enemy {
-  constructor(scene, player, hp, speed, dmg) {
+  constructor(scene, hp, speed, dmg) {
     this.id = generateRandomID();
     this.enemy = scene.physics.add.sprite(Phaser.Math.Between(100, worldBounds.x), Phaser.Math.Between(100, worldBounds.y), 'enemy');
     this.enemy.setBounce(0.2);
     this.enemy.setCollideWorldBounds(true);
-    this.player = player;
     this.speed = speed || 100;
     this.dmg = dmg || 1;
     this.scene = scene;
@@ -33,15 +33,15 @@ export default class Enemy {
   }
 
   handleEnemy(scene) {
-    scene.physics.add.collider(this.enemy, this.player, this.enemyPlayerCollision, null, scene);
+    scene.physics.add.collider(this.enemy, player.character, this.enemyPlayerCollision, null, scene);
     this.updateListener = scene.events.on('update', this.updateEnemyMovement, this);
   }
 
   updateEnemyMovement() {
-    const distance = Math.sqrt(Math.pow(this.player.x - this.enemy.x, 2) + Math.pow(this.player.y - this.enemy.y, 2));
+    const distance = Math.sqrt(Math.pow(player.character.x - this.enemy.x, 2) + Math.pow(player.character.y - this.enemy.y, 2));
 
-    const directionX = (this.player.x - this.enemy.x) / distance;
-    const directionY = (this.player.y - this.enemy.y) / distance;
+    const directionX = (player.character.x - this.enemy.x) / distance;
+    const directionY = (player.character.y - this.enemy.y) / distance;
 
     this.enemy.setVelocityX(directionX * this.speed);
     this.enemy.setVelocityY(directionY * this.speed);
@@ -53,7 +53,7 @@ export default class Enemy {
   }
 
   enemyPlayerCollision = () => {
-    handlePlayerDamage(this.scene, this.dmg);
+    player.handlePlayerDamaged(this.dmg);
   }
 
   createEnemyAnimations(scene) {
@@ -85,7 +85,7 @@ export default class Enemy {
       this.enemy.clearTint();
     }, 200);
 
-    this.hp -= playerDmg;
+    this.hp -= player.dmg;
 
     if (this.hp < 1) {
       const index = enemies.findIndex((enemy) => enemy.id === this.id);
@@ -102,11 +102,17 @@ export default class Enemy {
 
   handleDrop() {
     if (Math.random() < 0.3) {
-      let potion = new Item(this.scene, this.enemy.x, this.enemy.y, 'potion', 5);
-      this.scene.physics.add.overlap(this.player, potion, () => {
-        const newHP = potion.collect() + hpBar.value;
-        hpBar.setValue(newHP > 100 ? 100 : newHP);
+      let potion = new Item(this.scene, this.enemy.x, this.enemy.y, 'potion', 20);
+      this.scene.physics.add.overlap(player.character, potion, () => {
+        const newHP = potion.collect() + player.hpBar.value;
+        player.hpBar.setValue(newHP > 100 ? 100 : newHP);
       }, null, this.scene);
     }
+  }
+
+  respawnEnemy(scene) {
+    setTimeout(() => {
+      enemies.push(new Enemy(scene, 3, 100, 1))
+    }, 1000);
   }
 }
