@@ -1,7 +1,9 @@
 import HealthBar from './HPBar.js'
-import { enemies, tombstones, allTombstones, updateScore, score, setGameOver, handleVictory } from "./app.js";
+import { enemies, tombstones, allTombstones, updateScore, score, setGameOver, worldBounds } from "./app.js";
 import { directionAngles } from "./utils/constants.js";
 import skeleton from "./Enemies/Skeleton.js";
+import Item from "./Item.js";
+
 class Player {
   constructor() {
     this.character;
@@ -55,33 +57,33 @@ class Player {
   createPlayerAnimations(scene) {
     scene.anims.create({
       key: 'left',
-      frames: scene.anims.generateFrameNumbers('player', { start: 0, end: 10 }),
+      frames: scene.anims.generateFrameNumbers('player', { start: 1, end: 9 }),
       frameRate: 10,
       repeat: -1
     });
     scene.anims.create({
       key: 'up',
-      frames: scene.anims.generateFrameNumbers('player', { start: 0, end: 10 }),
+      frames: scene.anims.generateFrameNumbers('player', { start: 1, end: 9 }),
       frameRate: 10,
       repeat: -1
     });
 
     scene.anims.create({
       key: 'turn',
-      frames: scene.anims.generateFrameNumbers('player', { start: 0, end: 10 }),
+      frames: scene.anims.generateFrameNumbers('player', { start: 1, end: 9 }),
       frameRate: 10,
       repeat: -1
     });
 
     scene.anims.create({
       key: 'right',
-      frames: scene.anims.generateFrameNumbers('player', { start: 10, end: 0 }),
+      frames: scene.anims.generateFrameNumbers('player', { start: 9, end: 1 }),
       frameRate: 10,
       repeat: -1
     });
     scene.anims.create({
       key: 'down',
-      frames: scene.anims.generateFrameNumbers('player', { start: 10, end: 0 }),
+      frames: scene.anims.generateFrameNumbers('player', { start: 9, end: 1 }),
       frameRate: 10,
       repeat: -1
     });
@@ -148,33 +150,45 @@ class Player {
       this.attackDelay = false;
       this.attackVisual.setVisible(false);
     }, 500);
+
+    // TODO remove hit logic from player
     enemies.forEach((enemy) => {
       if (!enemy || !enemy.enemy) {
         return;
       }
+
       if (Phaser.Geom.Rectangle.ContainsPoint(enemy.getBounds(), new Phaser.Geom.Point(attackRangeX, attackRangeY))) {
         this.handleAttackHit(enemy, scene);
       }
     });
     tombstones.getChildren().forEach((tombstone) => {
       if (this.attackVisual.frame.texture.key !== 'shovel') {
-        return;
+        // return;
       }
       if (Phaser.Geom.Intersects.RectangleToRectangle(this.attackVisual.getBounds(), tombstone.getBounds())) {
-        this.handleTombstoneHit(tombstone);
+        this.handleTombstoneHit(scene, tombstone);
       }
     });
   }
 
-  handleTombstoneHit(tombstone) {
+  handleTombstoneHit(scene, tombstone) {
+    if (tombstone?.isHit) {
+      return;
+    }
     const index = allTombstones.indexOf(tombstone);
-    tombstone.destroy()
+    tombstone.isHit = true
     if (index > -1) {
       allTombstones.splice(index, 1);
     }
     if (allTombstones.length <= 0) {
-      // TODO drop key, trigger next scene
-      handleVictory()
+      let key = new Item(scene, tombstone.x, worldBounds.y < tombstone.y + 30 ? tombstone.y - 50 : tombstone.y + 50, 'key', 50);
+      scene.physics.add.overlap(this.character, key, () => {
+        key.collect()
+        scene.scene.start('EndOneScene');
+      }, null, scene);
+    } else {
+      let dirt = scene.physics.add.staticGroup()
+      dirt.create(tombstone.x, tombstone.y + 30, Math.random() > 0.5 ? 'dirt' : 'dirt2').setScale(.05);
     }
   }
 
@@ -183,7 +197,7 @@ class Player {
     if (!isDead) {
       return;
     }
-    updateScore(+score);
+    updateScore(score + 1);
     if (Math.random() < 0.3) {
       enemies.push(new skeleton(scene, 25, 75, 5))
     }

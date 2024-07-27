@@ -1,10 +1,11 @@
 import { StartScene } from './scenes/start.js';
 import { SceneOne } from './scenes/level_1.js';
+import { EndOneScene } from './scenes/end_1.js';
 
 let viewWidth = $(window).width()
 let viewHeight = $(window).height()
 
-export let worldBounds = { x: 2500, y: 2500 }
+export let worldBounds = { x: 2000, y: 2000 }
 
 export let enemies = [];
 export let score = 0;
@@ -25,7 +26,7 @@ var config = {
       debug: false
     }
   },
-  scene: [StartScene, SceneOne]
+  scene: [StartScene, SceneOne, EndOneScene]
 };
 
 new Phaser.Game(config);
@@ -38,8 +39,9 @@ export const createCommonSceneElements = (scene) => {
   scoreText.setScrollFactor(0);
 }
 
-export const updateScore = (score) => {
-  scoreText.setText('Score: ' + score);
+export const updateScore = (newScore) => {
+  score = newScore
+  scoreText.setText('Score: ' + newScore);
 }
 
 export const setTombstones = (tombstones) => {
@@ -51,8 +53,9 @@ export const generatetombstones = (scene) => {
   for (let i = 0; i < 20; i++) {
     let x = Phaser.Math.Between(0, worldBounds.x);
     let y = Phaser.Math.Between(0, worldBounds.y);
-    let tombstone = tombstones.create(x, y, 'tombstone');
-    tombstone.setScale(0.1, 0.1).refreshBody();
+    const rand = Math.random();
+    let tombstone = tombstones.create(x, y, `tombstone${Math.floor(Math.random() * 5) + 1}`);
+    tombstone.setScale(1.5).refreshBody();
     allTombstones.push(tombstone);
   }
 }

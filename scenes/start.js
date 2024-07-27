@@ -10,7 +10,7 @@ export class StartScene extends Phaser.Scene {
   }
 
   create() {
-    this.add.image(400, 300, 'coolGuy').setScale(.2);
+    this.add.image($(window).width() / 2, $(window).height() / 2, 'coolGuy').setScale(.2);
 
     const dialogText = this.add.text(400, 100, this.oldManDialog[this.dialogIndex], {
       fontSize: '32px',
