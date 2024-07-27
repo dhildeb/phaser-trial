@@ -1,13 +1,14 @@
 import HealthBar from './HPBar.js'
-import { enemies, tombstones, allTombstones, updateScore, score, setGameOver } from "./app.js";
+import { enemies, tombstones, allTombstones, updateScore, score, setGameOver, handleVictory } from "./app.js";
 import { directionAngles } from "./utils/constants.js";
 import skeleton from "./Enemies/Skeleton.js";
 class Player {
   constructor() {
     this.character;
-    this.dmg = 2
-    this.pressedKeys = {}
-    this.lastPressedKey = null
+    this.dmg = 2;
+    this.pressedKeys = {};
+    this.lastPressedKey = null;
+    this.wep = { img: 'rock', xScale: .05, yScale: .05 };
     this.hpBar;
     this.attackVisual;
     this.attackDelay;
@@ -17,8 +18,8 @@ class Player {
   setDmg = (dmg) => { this.dmg = dmg }
 
   setupPlayerCreate(scene) {
-    this.character = scene.physics.add.sprite(100, 450, 'dude');
-    this.character.setBounce(0.2);
+    this.character = scene.physics.add.sprite(100, 450, 'player');
+    this.character.setBounce(0.2).setScale(1.5);
     this.character.setCollideWorldBounds(true);
 
     this.hpBar = new HealthBar(scene, this.character.x - 50, this.character.y - 50, 100);
@@ -54,20 +55,33 @@ class Player {
   createPlayerAnimations(scene) {
     scene.anims.create({
       key: 'left',
-      frames: scene.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
+      frames: scene.anims.generateFrameNumbers('player', { start: 0, end: 10 }),
+      frameRate: 10,
+      repeat: -1
+    });
+    scene.anims.create({
+      key: 'up',
+      frames: scene.anims.generateFrameNumbers('player', { start: 0, end: 10 }),
       frameRate: 10,
       repeat: -1
     });
 
     scene.anims.create({
       key: 'turn',
-      frames: [{ key: 'dude', frame: 4 }],
-      frameRate: 20
+      frames: scene.anims.generateFrameNumbers('player', { start: 0, end: 10 }),
+      frameRate: 10,
+      repeat: -1
     });
 
     scene.anims.create({
       key: 'right',
-      frames: scene.anims.generateFrameNumbers('dude', { start: 5, end: 8 }),
+      frames: scene.anims.generateFrameNumbers('player', { start: 10, end: 0 }),
+      frameRate: 10,
+      repeat: -1
+    });
+    scene.anims.create({
+      key: 'down',
+      frames: scene.anims.generateFrameNumbers('player', { start: 10, end: 0 }),
       frameRate: 10,
       repeat: -1
     });
@@ -80,16 +94,15 @@ class Player {
       this.performAttack(scene);
     }
   }
-  setWeapon = (wep, scaleX = 1, scaleY = 1) => {
-    this.attackVisual.setTexture(wep)
-    this.attackVisual.setScale(scaleX, scaleY)
+  setWeapon = (wep, x = 1, y = 1) => {
+    this.wep = { img: wep, xScale: x, yScale: y };
   }
 
   performAttack(scene) {
     this.attackDelay = true;
-    this.attackVisual = scene.add.sprite(0, 0, 'rock');
+    this.attackVisual = scene.add.sprite(0, 0, this.wep.img);
     this.attackVisual.setVisible(false);
-    this.attackVisual.setScale(.05);
+    this.attackVisual.setScale(this.wep.xScale, this.wep.yScale)
     let attackRangeX = this.character.x;
     let attackRangeY = this.character.y;
 
@@ -148,7 +161,7 @@ class Player {
         return;
       }
       if (Phaser.Geom.Intersects.RectangleToRectangle(this.attackVisual.getBounds(), tombstone.getBounds())) {
-        handleTombstoneHit(tombstone);
+        this.handleTombstoneHit(tombstone);
       }
     });
   }
@@ -160,6 +173,7 @@ class Player {
       allTombstones.splice(index, 1);
     }
     if (allTombstones.length <= 0) {
+      // TODO drop key, trigger next scene
       handleVictory()
     }
   }
@@ -208,7 +222,8 @@ class Player {
     this.character.setVelocityX(velocityX);
     this.character.setVelocityY(velocityY);
     if (direction) {
-      this.character.anims.play(direction, true);
+      this.character.setFlipX(direction.includes('right') || direction.includes('down'));
+      this.character.anims.play(direction.includes('up') ? 'up' : direction.includes('down') ? 'down' : direction, true);
       this.lastPressedKey = direction; // Update last pressed direction
     } else {
       this.character.setVelocity(0); // Stop the player if no keys are pressed

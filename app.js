@@ -3,6 +3,7 @@ import { SceneOne } from './scenes/level_1.js';
 
 let viewWidth = $(window).width()
 let viewHeight = $(window).height()
+
 export let worldBounds = { x: 2500, y: 2500 }
 
 export let enemies = [];
@@ -12,6 +13,7 @@ export let gameOver;
 export let tombstones;
 export let allTombstones = [];
 
+document.body.style.overflow = 'hidden';
 
 var config = {
   type: Phaser.AUTO,

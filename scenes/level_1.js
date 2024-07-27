@@ -15,7 +15,7 @@ export class SceneOne extends Phaser.Scene {
     this.load.image('rock', './assets/rock.png');
     this.load.image('potion', './assets/star.png');
     this.load.image('shovel', './assets/shovel.png');
-    this.load.spritesheet('dude', './assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet('player', './assets/scared_little_girl.png', { frameWidth: 20, frameHeight: 29 });
     this.load.spritesheet('skeleton', './assets/skeleton.png', { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('enemy', './assets/Wisp.png', { frameWidth: 32, frameHeight: 32 });
   }
