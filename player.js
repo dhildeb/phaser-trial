@@ -163,7 +163,7 @@ class Player {
     });
     tombstones.getChildren().forEach((tombstone) => {
       if (this.attackVisual.frame.texture.key !== 'shovel') {
-        // return;
+        return;
       }
       if (Phaser.Geom.Intersects.RectangleToRectangle(this.attackVisual.getBounds(), tombstone.getBounds())) {
         this.handleTombstoneHit(scene, tombstone);
