@@ -1,4 +1,4 @@
 start server: 
-  http-server --proxy http://localhost:8080
+  npm run serve
 
 navigate to url

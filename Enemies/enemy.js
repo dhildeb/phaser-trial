@@ -1,4 +1,4 @@
-import { enemies, worldBounds } from '../app.js';
+import { enemies, tombstones, worldBounds } from '../app.js';
 import { generateRandomID } from "../util.js";
 import Item from "../Item.js";
 import { player } from "../player.js";
@@ -13,6 +13,8 @@ export default class Enemy {
     this.dmg = dmg || 1;
     this.scene = scene;
     this.hp = hp || 1;
+    this.slowed;
+    this.invincible;
 
     this.enemy.body.setSize(this.enemy.width - 25, this.enemy.height - 25);
 
@@ -34,7 +36,28 @@ export default class Enemy {
 
   handleEnemy(scene) {
     scene.physics.add.collider(this.enemy, player.character, this.enemyPlayerCollision, null, scene);
+    scene.physics.add.overlap(this.enemy, tombstones, this.handleObstacle.bind(this), null, scene);
     this.updateListener = scene.events.on('update', this.updateEnemyMovement, this);
+  }
+
+  setSpeed(newSpeed) {
+    this.speed = newSpeed;
+  }
+
+  handleObstacle() {
+    if (this.slowed) {
+      return;
+    }
+    this.slowed = true
+    this.setSpeed(30)
+    this.enemy.setAlpha(0.5);
+    this.invincible = true
+    setTimeout(() => {
+      this.invincible = false
+      this.enemy.setAlpha(1);
+      this.slowed = false
+      this.setSpeed(100)
+    }, 1000)
   }
 
   updateEnemyMovement() {
@@ -79,6 +102,9 @@ export default class Enemy {
   }
 
   handleAttackHit() {
+    if (this.invincible) {
+      return;
+    }
     this.enemy.setTint(0xff0000);
 
     setTimeout(() => {
