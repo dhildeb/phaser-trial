@@ -1,5 +1,5 @@
 
-import { createCommonSceneElements, tombstones, enemies, gameOver, worldBounds } from "../app.js";
+import { createCommonSceneElements, tombstones, enemies, gameOver, worldBounds, buildingPositions } from "../app.js";
 import { player } from "../player.js";
 import Enemy from "../Enemies/enemy.js";
 
@@ -16,6 +16,7 @@ export class SceneOne extends Phaser.Scene {
     this.load.image('tombstone5', './assets/tombstone5.png');
     this.load.image('fence_x', './assets/fence_x.png');
     this.load.image('fence_y', './assets/fence_y.png');
+    this.load.image('crypt', './assets/crypt.png');
     this.load.image('dirt', './assets/dirt.png');
     this.load.image('dirt2', './assets/dirt.webp');
     this.load.image('star', './assets/star.png');
@@ -31,6 +32,15 @@ export class SceneOne extends Phaser.Scene {
     createCommonSceneElements(this)
     player.setupPlayerCreate(this);
     this.createWorldBorder(this, worldBounds);
+    const buildings = this.physics.add.staticGroup();
+    let coor = buildingPositions.find((b) => b.key === 'crypt')
+    const crypt = buildings.create(coor.x, coor.y, 'crypt');
+
+    crypt.setOrigin(0.5, 0.5).setDepth(-4);
+
+    this.physics.add.collider(player.character, buildings);
+
+    this.physics.add.collider(player.character, crypt);
     this.physics.add.collider(player.character, tombstones);
     this.cameras.main.startFollow(player.character);
 

@@ -5,7 +5,7 @@ import { EndOneScene } from './scenes/end_1.js';
 let viewWidth = $(window).width()
 let viewHeight = $(window).height()
 
-export let worldBounds = { x: 2000, y: 2000 }
+export let worldBounds = { x: 2048, y: 2048 }
 
 export let enemies = [];
 export let score = 0;
@@ -13,6 +13,9 @@ export let scoreText;
 export let gameOver;
 export let tombstones;
 export let allTombstones = [];
+export let buildingPositions = [{ key: 'crypt', x: 1024, y: 896 }]
+const GRID_SIZE = 128;
+const grid = Array.from({ length: worldBounds.x / GRID_SIZE }, () => Array(worldBounds.y / GRID_SIZE).fill(false));
 
 document.body.style.overflow = 'hidden';
 
@@ -34,6 +37,7 @@ new Phaser.Game(config);
 export const createCommonSceneElements = (scene) => {
   scene.physics.world.setBounds(48, 48, worldBounds.x - 72, worldBounds.y - 100);
   scene.cameras.main.setBounds(0, 0, worldBounds.x, worldBounds.y);
+  initializeGrid();
   generatetombstones(scene);
   scoreText = scene.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#ffffff' });
   scoreText.setScrollFactor(0);
@@ -48,16 +52,58 @@ export const setTombstones = (tombstones) => {
   tombstones = tombstones
 }
 
+const initializeGrid = () => {
+
+  const crypt = buildingPositions.find((b) => b.key === 'crypt')
+  const max = crypt.x / GRID_SIZE + 1
+  const min = crypt.y / GRID_SIZE - 1
+  for (let i = min; i < max; i++) {
+    for (let j = min; j < max; j++) {
+      markCellsOccupied(i, j)
+    }
+  }
+};
+
+const markCellsOccupied = (row, col) => {
+  if (grid[row]) {
+    grid[row][col] = true;
+  }
+};
+
+const isCellOccupied = (row, col) => {
+  return grid[row] ? grid[row][col] : false;
+};
+const getGridCoordinates = (x, y) => {
+  const row = Math.floor(y / GRID_SIZE);
+  const col = Math.floor(x / GRID_SIZE);
+  return { row, col };
+};
+
 export const generatetombstones = (scene) => {
-  tombstones = scene.physics.add.staticGroup()
+  tombstones = scene.physics.add.staticGroup();
+  let x, y, row, col, isValid;
   for (let i = 0; i < 20; i++) {
-    let x = Phaser.Math.Between(128, worldBounds.x - 128);
-    let y = Phaser.Math.Between(128, worldBounds.y - 128);
+    do {
+      x = Phaser.Math.Between(128, worldBounds.x - 128);
+      y = Phaser.Math.Between(128, worldBounds.y - 128);
+      ({ row, col } = getGridCoordinates(x, y));
+      isValid = !isCellOccupied(row, col);
+
+    } while (!isValid);
+
     let tombstone = tombstones.create(x, y, `tombstone${Math.floor(Math.random() * 5) + 1}`);
     tombstone.setScale(1.5).refreshBody();
+
+    markCellsOccupied(row, col);
     allTombstones.push(tombstone);
   }
-}
+};
+
+export const addBuilding = (scene, x, y, key) => {
+  const building = scene.physics.add.staticGroup().create(x, y, key);
+  markCellsOccupied(x, y, building.displayWidth, building.displayHeight);
+  return building;
+};
 
 export const handleVictory = () => {
   gameOver = true;
