@@ -20,7 +20,7 @@ class Player {
   setDmg = (dmg) => { this.dmg = dmg }
 
   setupPlayerCreate(scene) {
-    this.character = scene.physics.add.sprite(100, 450, 'player');
+    this.character = scene.physics.add.sprite(worldBounds.x / 2, worldBounds.y / 2, 'player');
     this.character.setBounce(0.2).setScale(1.5);
     this.character.setCollideWorldBounds(true);
 

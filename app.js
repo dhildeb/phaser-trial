@@ -32,7 +32,7 @@ var config = {
 new Phaser.Game(config);
 
 export const createCommonSceneElements = (scene) => {
-  scene.physics.world.setBounds(0, 0, worldBounds.x, worldBounds.y);
+  scene.physics.world.setBounds(48, 48, worldBounds.x - 72, worldBounds.y - 100);
   scene.cameras.main.setBounds(0, 0, worldBounds.x, worldBounds.y);
   generatetombstones(scene);
   scoreText = scene.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#ffffff' });
@@ -51,9 +51,8 @@ export const setTombstones = (tombstones) => {
 export const generatetombstones = (scene) => {
   tombstones = scene.physics.add.staticGroup()
   for (let i = 0; i < 20; i++) {
-    let x = Phaser.Math.Between(0, worldBounds.x);
-    let y = Phaser.Math.Between(0, worldBounds.y);
-    const rand = Math.random();
+    let x = Phaser.Math.Between(128, worldBounds.x - 128);
+    let y = Phaser.Math.Between(128, worldBounds.y - 128);
     let tombstone = tombstones.create(x, y, `tombstone${Math.floor(Math.random() * 5) + 1}`);
     tombstone.setScale(1.5).refreshBody();
     allTombstones.push(tombstone);
