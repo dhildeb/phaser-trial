@@ -15,6 +15,8 @@ class Player {
     this.attackVisual;
     this.attackDelay;
     this.cursors;
+    this.powerLevel;
+    this.powerBar;
   }
 
   setDmg = (dmg) => { this.dmg = dmg }
@@ -24,7 +26,8 @@ class Player {
     this.character.setBounce(0.2).setScale(1.5);
     this.character.setCollideWorldBounds(true);
 
-    this.hpBar = new HealthBar(scene, this.character.x - 50, this.character.y - 50, 100);
+    this.hpBar = new HealthBar(scene, this.character.x, this.character.y - 50, 100);
+    this.powerBar = new HealthBar(scene, this.character.x, this.character.y + 50, 0, 0xFFFF00);
 
     // Input events
     this.cursors = scene.input.keyboard.createCursorKeys();
@@ -91,16 +94,45 @@ class Player {
 
   setupPlayerUpdate(scene) {
     this.hpBar.setPosition(player.character.x - 50, player.character.y - 50);
+    this.powerBar.setPosition(player.character.x - 50, player.character.y + 50);
     this.handlePlayerMovement();
-    if (Phaser.Input.Keyboard.JustDown(this.cursors.space) && !this.attackDelay) {
-      this.performAttack(scene);
+    if (this.cursors.space.isDown) {
+      this.chargePowerUp();
+    } else if (Phaser.Input.Keyboard.JustUp(this.cursors.space) && !this.attackDelay) {
+      this.performAttack(scene, this.powerLevel);
+      this.resetPowerUp();
     }
   }
+
+  chargePowerUp = () => {
+    if (this.powerLevel < 100) {
+      this.powerLevel++
+      this.powerBar.setValue(this.powerLevel);
+    }
+    if (this.powerLevel >= 50) {
+      this.powerBar.setColor(0x00FF00)
+    }
+    if (this.powerLevel >= 100) {
+      this.powerBar.setColor(0x00FFFF)
+    }
+  }
+  resetPowerUp = () => {
+    if (this.powerLevel >= 50) {
+      this.dmg /= 2
+      this.powerBar.setColor(0xFFFF00)
+    }
+    this.powerLevel = 0;
+    this.powerBar.setValue(this.powerLevel);
+  }
+
   setWeapon = (wep, x = 1, y = 1) => {
     this.wep = { img: wep, xScale: x, yScale: y };
   }
 
   performAttack(scene) {
+    if (this.powerLevel > 50) {
+      this.dmg *= 2
+    }
     this.attackDelay = true;
     this.attackVisual = scene.add.sprite(0, 0, this.wep.img);
     this.attackVisual.setVisible(false);
@@ -110,32 +142,32 @@ class Player {
 
     switch (this.lastPressedKey) {
       case 'up':
-        attackRangeY -= 50;
+        attackRangeY -= this.powerLevel;
         break;
       case 'down':
-        attackRangeY += 50;
+        attackRangeY += this.powerLevel;
         break;
       case 'left':
-        attackRangeX -= 50;
+        attackRangeX -= this.powerLevel;
         break;
       case 'right':
-        attackRangeX += 50;
+        attackRangeX += this.powerLevel;
         break;
       case 'upleft':
-        attackRangeX -= 50;
-        attackRangeY -= 50;
+        attackRangeX -= this.powerLevel;
+        attackRangeY -= this.powerLevel;
         break;
       case 'upright':
-        attackRangeX += 50;
-        attackRangeY -= 50;
+        attackRangeX += this.powerLevel;
+        attackRangeY -= this.powerLevel;
         break;
       case 'downleft':
-        attackRangeX -= 50;
-        attackRangeY += 50;
+        attackRangeX -= this.powerLevel;
+        attackRangeY += this.powerLevel;
         break;
       case 'downright':
-        attackRangeX += 50;
-        attackRangeY += 50;
+        attackRangeX += this.powerLevel;
+        attackRangeY += this.powerLevel;
         break;
       default:
         // If no valid direction, do nothing

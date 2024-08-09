@@ -1,8 +1,9 @@
 export default class HealthBar extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, value) {
+  constructor(scene, x, y, value, color) {
     super(scene, x, y);
     this.scene = scene;
     this.value = value;
+    this.color = color || 0xff0000
 
     // Create the background of the health bar (gray bar)
     this.bg = new Phaser.GameObjects.Graphics(scene);
@@ -12,7 +13,7 @@ export default class HealthBar extends Phaser.GameObjects.Container {
 
     // Create the health bar (red bar)
     this.bar = new Phaser.GameObjects.Graphics(scene);
-    this.bar.fillStyle(0xff0000);
+    this.bar.fillStyle(this.color);
     this.bar.fillRect(2, 2, 96, 16);
     this.add(this.bar);
 
@@ -28,5 +29,11 @@ export default class HealthBar extends Phaser.GameObjects.Container {
   setValue(value) {
     this.bar.scaleX = Phaser.Math.Clamp(value / 100, 0, 1);
     this.value = value
+  }
+  setColor(color) {
+    this.color = color;
+    this.bar.clear();
+    this.bar.fillStyle(this.color);
+    this.bar.fillRect(2, 2, 96, 16);
   }
 }
