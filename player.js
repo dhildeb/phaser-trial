@@ -1,5 +1,5 @@
 import HealthBar from './HPBar.js'
-import { enemies, tombstones, allTombstones, updateScore, score, setGameOver, worldBounds } from "./app.js";
+import { enemies, tombstones, allTombstones, updateScore, score, setGameOver, worldBounds, viewWidth, viewHeight } from "./app.js";
 import { directionAngles } from "./utils/constants.js";
 import skeleton from "./Enemies/Skeleton.js";
 import Item from "./Item.js";
@@ -26,10 +26,9 @@ class Player {
     this.character.setBounce(0.2).setScale(1.5);
     this.character.setCollideWorldBounds(true);
 
-    this.hpBar = new HealthBar(scene, this.character.x, this.character.y - 50, 100);
-    this.powerBar = new HealthBar(scene, this.character.x, this.character.y + 50, 0, 0xFFFF00);
+    this.hpBar = new HealthBar(scene, viewWidth / 2, 16, 100);
+    this.powerBar = new HealthBar(scene, viewWidth / 2, viewHeight - 32, 0, 0xFFFF00);
 
-    // Input events
     this.cursors = scene.input.keyboard.createCursorKeys();
     scene.input.keyboard.on('keydown', (event) => {
       switch (event.code) {
@@ -42,14 +41,13 @@ class Player {
       }
     });
 
-    // Use the 'keyup' event to remove released arrow keys from this.pressedKeys
     scene.input.keyboard.on('keyup', (event) => {
       switch (event.code) {
         case 'ArrowUp':
         case 'ArrowDown':
         case 'ArrowLeft':
         case 'ArrowRight':
-          delete this.pressedKeys[event.code]; // Remove released keys
+          delete this.pressedKeys[event.code];
           break;
       }
     });
@@ -93,20 +91,20 @@ class Player {
   }
 
   setupPlayerUpdate(scene) {
-    this.hpBar.setPosition(player.character.x - 50, player.character.y - 50);
-    this.powerBar.setPosition(player.character.x - 50, player.character.y + 50);
     this.handlePlayerMovement();
     if (this.cursors.space.isDown) {
       this.chargePowerUp();
     } else if (Phaser.Input.Keyboard.JustUp(this.cursors.space) && !this.attackDelay) {
       this.performAttack(scene, this.powerLevel);
-      this.resetPowerUp();
+      scene.time.delayedCall(100, () => {
+        this.resetPowerUp();
+      })
     }
   }
 
   chargePowerUp = () => {
     if (this.powerLevel < 100) {
-      this.powerLevel++
+      this.powerLevel += 2
       this.powerBar.setValue(this.powerLevel);
     }
     if (this.powerLevel >= 50) {
@@ -131,12 +129,14 @@ class Player {
 
   performAttack(scene) {
     if (this.powerLevel > 50) {
-      this.dmg *= 2
+      this.dmg *= 2;
     }
     this.attackDelay = true;
-    this.attackVisual = scene.add.sprite(0, 0, this.wep.img);
-    this.attackVisual.setVisible(false);
-    this.attackVisual.setScale(this.wep.xScale, this.wep.yScale)
+
+    this.attackVisual = scene.physics.add.sprite(this.character.x, this.character.y, this.wep.img);
+    this.attackVisual.setVisible(true);
+    this.attackVisual.setScale(this.wep.xScale, this.wep.yScale);
+
     let attackRangeX = this.character.x;
     let attackRangeY = this.character.y;
 
@@ -170,29 +170,30 @@ class Player {
         attackRangeY += this.powerLevel;
         break;
       default:
-        // If no valid direction, do nothing
         return;
     }
 
-    this.attackVisual.setPosition(attackRangeX, attackRangeY);
-    const angle = directionAngles[this.lastPressedKey] || 0;
-    this.attackVisual.setAngle(angle);
-    this.attackVisual.setVisible(true);
-    setTimeout(() => {
-      this.attackDelay = false;
-      this.attackVisual.setVisible(false);
-    }, 500);
-
-    // TODO remove hit logic from player
-    enemies.forEach((enemy) => {
-      if (!enemy || !enemy.enemy) {
-        return;
-      }
-
-      if (Phaser.Geom.Rectangle.ContainsPoint(enemy.getBounds(), new Phaser.Geom.Point(attackRangeX, attackRangeY))) {
-        this.handleAttackHit(enemy, scene);
+    scene.tweens.add({
+      targets: this.attackVisual,
+      x: attackRangeX,
+      y: attackRangeY,
+      duration: 200,
+      onComplete: () => {
+        this.attackVisual.destroy();
+        this.attackDelay = false;
       }
     });
+
+    scene.physics.moveTo(this.attackVisual, attackRangeX, attackRangeY, 200);
+    scene.physics.add.collider(this.attackVisual, enemies.map(enemy => enemy.enemy), (attackVisual, enemySprite) => {
+      const enemy = enemies.find(e => e.enemy === enemySprite);
+      if (enemy) {
+        this.handleAttackHit(enemy, scene);
+        this.attackVisual.destroy();
+      }
+    });
+
+    // Check for tombstone hits
     tombstones.getChildren().forEach((tombstone) => {
       if (this.attackVisual.frame.texture.key !== 'shovel') {
         return;
@@ -225,13 +226,18 @@ class Player {
   }
 
   handleAttackHit(enemy, scene) {
-    const isDead = enemy.handleAttackHit()
+    if (!enemy || !enemy.enemy) {
+      return;
+    }
+    const isDead = enemy.handleAttackHit(this.dmg)
     if (!isDead) {
       return;
     }
     updateScore(score + 1);
     if (Math.random() < 0.3) {
-      enemies.push(new skeleton(scene, 25, 75, 5))
+      scene.time.delayedCall(500, () => {
+        enemies.push(new skeleton(scene, 25, 75, 5))
+      });
     }
 
     enemy.respawnEnemy(scene);

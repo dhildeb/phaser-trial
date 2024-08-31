@@ -2,8 +2,8 @@ import { StartScene } from './scenes/start.js';
 import { SceneOne } from './scenes/level_1.js';
 import { EndOneScene } from './scenes/end_1.js';
 
-let viewWidth = $(window).width()
-let viewHeight = $(window).height()
+export let viewWidth = $(window).width()
+export let viewHeight = $(window).height()
 
 export let worldBounds = { x: 2048, y: 2048 }
 

@@ -13,20 +13,28 @@ export default class Enemy {
     this.dmg = dmg || 1;
     this.scene = scene;
     this.hp = hp || 1;
-    this.slowed;
-    this.invincible;
+    this.slowed = false;
+    this.invincible = false;
 
     this.enemy.body.setSize(this.enemy.width - 25, this.enemy.height - 25);
 
+    // // Use Phaser's built-in timer instead of setTimeout
+    // this.scene.time.addEvent({
+    //   delay: 1000,
+    //   callback: this.restoreSpeed,
+    //   callbackScope: this,
+    //   loop: false
+    // });
 
-    this.configureEnemy()
+    this.configureEnemy();
   }
 
   configureEnemy() {
-    this.createEnemyAnimations(this.scene);
+    if (!this.scene.anims.get('left_enemy')) {
+      this.createEnemyAnimations(this.scene);
+    }
 
     this.updateEnemyMovement = this.updateEnemyMovement.bind(this);
-
     this.handleEnemy(this.scene);
   }
 
@@ -35,8 +43,8 @@ export default class Enemy {
   }
 
   handleEnemy(scene) {
-    scene.physics.add.collider(this.enemy, player.character, this.enemyPlayerCollision, null, scene);
-    scene.physics.add.overlap(this.enemy, tombstones, this.handleObstacle.bind(this), null, scene);
+    scene.physics.add.collider(this.enemy, player.character, this.enemyPlayerCollision, null, this);
+    scene.physics.add.overlap(this.enemy, tombstones, this.handleObstacle.bind(this), null, this);
     this.updateListener = scene.events.on('update', this.updateEnemyMovement, this);
   }
 
@@ -45,34 +53,31 @@ export default class Enemy {
   }
 
   handleObstacle() {
-    if (this.slowed) {
-      return;
-    }
-    this.slowed = true
-    this.setSpeed(30)
+    if (this.slowed) return;
+    this.slowed = true;
+    this.setSpeed(30);
     this.enemy.setAlpha(0.5);
-    this.invincible = true
-    setTimeout(() => {
-      this.invincible = false
+    this.invincible = true;
+
+    this.scene.time.delayedCall(1000, () => {
+      this.invincible = false;
       this.enemy.setAlpha(1);
-      this.slowed = false
-      this.setSpeed(100)
-    }, 1000)
+      this.slowed = false;
+      this.setSpeed(100);
+    });
   }
 
   updateEnemyMovement() {
-    const distance = Math.sqrt(Math.pow(player.character.x - this.enemy.x, 2) + Math.pow(player.character.y - this.enemy.y, 2));
+    const distance = Phaser.Math.Distance.Between(player.character.x, player.character.y, this.enemy.x, this.enemy.y);
+    // if (distance > 200) return; // Skip movement updates for far-away enemies
 
     const directionX = (player.character.x - this.enemy.x) / distance;
     const directionY = (player.character.y - this.enemy.y) / distance;
 
     this.enemy.setVelocityX(directionX * this.speed);
     this.enemy.setVelocityY(directionY * this.speed);
-    if (directionX > 0) {
-      this.enemy.anims.play('right_enemy', true);
-    } else {
-      this.enemy.anims.play('left_enemy', true);
-    }
+
+    this.enemy.anims.play(directionX > 0 ? 'right_enemy' : 'left_enemy', true);
   }
 
   enemyPlayerCollision = () => {
@@ -101,29 +106,33 @@ export default class Enemy {
     });
   }
 
-  handleAttackHit() {
+  handleAttackHit(dmg) {
     if (this.invincible) {
       return;
     }
     this.enemy.setTint(0xff0000);
 
-    setTimeout(() => {
+    this.scene.time.delayedCall(200, () => {
       this.enemy.clearTint();
-    }, 200);
+    });
 
     this.hp -= player.dmg;
 
     if (this.hp < 1) {
+      this.handleDrop();
       const index = enemies.findIndex((enemy) => enemy.id === this.id);
       enemies.splice(index, 1);
-
       this.scene.events.off('update', this.updateEnemyMovement, this);
-
-      this.enemy.destroy();
-      this.handleDrop();
+      this.scene.time.delayedCall(100, () => {
+        this.enemy.destroy();
+      })
       return true;
     }
     return false;
+  }
+
+  removeSelf() {
+
   }
 
   handleDrop() {
@@ -137,8 +146,8 @@ export default class Enemy {
   }
 
   respawnEnemy(scene) {
-    setTimeout(() => {
+    this.scene.time.delayedCall(1000, () => {
       enemies.push(new Enemy(scene, 3, 100, 1))
-    }, 1000);
+    });
   }
 }

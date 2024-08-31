@@ -18,31 +18,7 @@ export default class skeleton extends Enemy {
 
   handleEnemy(scene) {
     scene.physics.add.collider(this.enemy, player.character, this.enemyPlayerCollision, null, scene);
-    scene.physics.add.collider(this.enemy, tombstones, this.handleObstacle.bind(this), null, scene);
     this.updateListener = scene.events.on('update', this.updateEnemyMovement, this);
-  }
-
-  handleObstacle(enemy, tombstone) {
-    this.isCollidingWithObstacle = true;
-    setTimeout(() => {
-      this.isCollidingWithObstacle = false
-    }, 500)
-    const dx = enemy.x - tombstone.x;
-    const dy = enemy.y - tombstone.y;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-      if (dx > 0) {
-        this.enemy.setVelocityY(this.speed);  // Move down
-      } else {
-        this.enemy.setVelocityY(-this.speed); // Move up
-      }
-    } else {
-      if (dy > 0) {
-        this.enemy.setVelocityX(this.speed);  // Move right
-      } else {
-        this.enemy.setVelocityX(-this.speed); // Move left
-      }
-    }
   }
 
   updateEnemyMovement() {
