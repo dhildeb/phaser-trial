@@ -1,8 +1,9 @@
 import HealthBar from './HPBar.js'
 import { enemies, tombstones, allTombstones, updateScore, score, setGameOver, worldBounds, viewWidth, viewHeight } from "./app.js";
-import { directionAngles } from "./utils/constants.js";
 import skeleton from "./Enemies/Skeleton.js";
 import Item from "./Item.js";
+import { directionAngles } from "./utils/constants.js"
+import { getWepRangePos, getWepStartPos } from "./utils/weaponHelper.js";
 
 class Player {
   constructor() {
@@ -133,58 +134,34 @@ class Player {
     }
     this.attackDelay = true;
 
-    this.attackVisual = scene.physics.add.sprite(this.character.x, this.character.y, this.wep.img);
+    const { wepStartX, wepStartY } = getWepStartPos(this.character.x, this.character.y, this.lastPressedKey, this.wep.img)
+
+    this.attackVisual = scene.physics.add.sprite(wepStartX, wepStartY, this.wep.img);
     this.attackVisual.setVisible(true);
     this.attackVisual.setScale(this.wep.xScale, this.wep.yScale);
-
-    let attackRangeX = this.character.x;
-    let attackRangeY = this.character.y;
-
-    switch (this.lastPressedKey) {
-      case 'up':
-        attackRangeY -= this.powerLevel;
-        break;
-      case 'down':
-        attackRangeY += this.powerLevel;
-        break;
-      case 'left':
-        attackRangeX -= this.powerLevel;
-        break;
-      case 'right':
-        attackRangeX += this.powerLevel;
-        break;
-      case 'upleft':
-        attackRangeX -= this.powerLevel;
-        attackRangeY -= this.powerLevel;
-        break;
-      case 'upright':
-        attackRangeX += this.powerLevel;
-        attackRangeY -= this.powerLevel;
-        break;
-      case 'downleft':
-        attackRangeX -= this.powerLevel;
-        attackRangeY += this.powerLevel;
-        break;
-      case 'downright':
-        attackRangeX += this.powerLevel;
-        attackRangeY += this.powerLevel;
-        break;
-      default:
-        return;
+    const isWepShovel = this.wep.img === 'shovel'
+    if (isWepShovel) {
+      console.log(this.lastPressedKey)
+      console.log(directionAngles[this.lastPressedKey])
+      this.attackVisual.setRotation(directionAngles[this.lastPressedKey])
     }
+
+    const { attackRangeX, attackRangeY } = getWepRangePos(wepStartX, wepStartY, this.lastPressedKey, this.wep.img, this.powerLevel)
+
+    const duration = isWepShovel ? 75 : 200
 
     scene.tweens.add({
       targets: this.attackVisual,
       x: attackRangeX,
       y: attackRangeY,
-      duration: 200,
+      duration: duration,
       onComplete: () => {
         this.attackVisual.destroy();
         this.attackDelay = false;
       }
     });
 
-    scene.physics.moveTo(this.attackVisual, attackRangeX, attackRangeY, 200);
+    scene.physics.moveTo(this.attackVisual, attackRangeX, attackRangeY, duration);
     scene.physics.add.collider(this.attackVisual, enemies.map(enemy => enemy.enemy), (attackVisual, enemySprite) => {
       const enemy = enemies.find(e => e.enemy === enemySprite);
       if (enemy) {
@@ -195,7 +172,7 @@ class Player {
 
     // Check for tombstone hits
     tombstones.getChildren().forEach((tombstone) => {
-      if (this.attackVisual.frame.texture.key !== 'shovel') {
+      if (!isWepShovel) {
         return;
       }
       if (Phaser.Geom.Intersects.RectangleToRectangle(this.attackVisual.getBounds(), tombstone.getBounds())) {
