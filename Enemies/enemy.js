@@ -10,21 +10,14 @@ export default class Enemy {
     this.enemy.setBounce(0.2);
     this.enemy.setCollideWorldBounds(true);
     this.speed = speed || 100;
+    this.originalSpeed = this.speed
     this.dmg = dmg || 1;
     this.scene = scene;
     this.hp = hp || 1;
     this.slowed = false;
     this.invincible = false;
 
-    this.enemy.body.setSize(this.enemy.width - 25, this.enemy.height - 25);
-
-    // // Use Phaser's built-in timer instead of setTimeout
-    // this.scene.time.addEvent({
-    //   delay: 1000,
-    //   callback: this.restoreSpeed,
-    //   callbackScope: this,
-    //   loop: false
-    // });
+    this.enemy.body.setSize(this.enemy.width - 5, this.enemy.height - 5);
 
     this.configureEnemy();
   }

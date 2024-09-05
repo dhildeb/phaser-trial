@@ -18,6 +18,8 @@ class Player {
     this.cursors;
     this.powerLevel;
     this.powerBar;
+    this.speed = 200
+    this.originalSpeed = this.speed
   }
 
   setDmg = (dmg) => { this.dmg = dmg }
@@ -97,7 +99,7 @@ class Player {
       this.chargePowerUp();
     } else if (Phaser.Input.Keyboard.JustUp(this.cursors.space) && !this.attackDelay) {
       this.performAttack(scene, this.powerLevel);
-      scene.time.delayedCall(100, () => {
+      scene.time.delayedCall(250, () => {
         this.resetPowerUp();
       })
     }
@@ -141,8 +143,6 @@ class Player {
     this.attackVisual.setScale(this.wep.xScale, this.wep.yScale);
     const isWepShovel = this.wep.img === 'shovel'
     if (isWepShovel) {
-      console.log(this.lastPressedKey)
-      console.log(directionAngles[this.lastPressedKey])
       this.attackVisual.setRotation(directionAngles[this.lastPressedKey])
     }
 
@@ -220,6 +220,10 @@ class Player {
     enemy.respawnEnemy(scene);
   }
 
+  setSpeed(newSpeed) {
+    this.speed = newSpeed
+  }
+
   handlePlayerMovement() {
     let velocityX = 0;
     let velocityY = 0;
@@ -227,19 +231,19 @@ class Player {
 
     // Determine movement direction based on pressed keys
     if (this.pressedKeys['ArrowUp']) {
-      velocityY = -200;
+      velocityY = -this.speed;
       direction += 'up';
     }
     if (this.pressedKeys['ArrowDown']) {
-      velocityY = 200;
+      velocityY = this.speed;
       direction += 'down';
     }
     if (this.pressedKeys['ArrowLeft']) {
-      velocityX = -200;
+      velocityX = -this.speed;
       direction += 'left';
     }
     if (this.pressedKeys['ArrowRight']) {
-      velocityX = 200;
+      velocityX = this.speed;
       direction += 'right';
     }
 

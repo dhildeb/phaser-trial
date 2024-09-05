@@ -1,7 +1,6 @@
 import Enemy from './enemy.js';
 import Item from "../Item.js";
 import { player } from "../player.js";
-import { tombstones } from '../app.js';
 
 export default class skeleton extends Enemy {
   constructor(scene, hp, speed, dmg) {
@@ -10,7 +9,8 @@ export default class skeleton extends Enemy {
 
   configureEnemy() {
     this.createEnemyAnimations(this.scene);
-
+    this.enemy.setSize(32, 48);
+    this.enemy.setOffset(16, 14);
     this.updateEnemyMovement = this.updateEnemyMovement.bind(this);
 
     this.handleEnemy(this.scene);
