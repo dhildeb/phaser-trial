@@ -1,6 +1,7 @@
 import { StartScene } from './scenes/start.js';
 import { SceneOne } from './scenes/level_1.js';
 import { EndOneScene } from './scenes/end_1.js';
+import { headstoneRips } from "./utils/constants.js";
 
 export let viewWidth = $(window).width()
 export let viewHeight = $(window).height()
@@ -82,22 +83,32 @@ const getGridCoordinates = (x, y) => {
 export const generatetombstones = (scene) => {
   tombstones = scene.physics.add.staticGroup();
   let x, y, row, col, isValid;
+
   for (let i = 0; i < 20; i++) {
     do {
       x = Phaser.Math.Between(128, worldBounds.x - 128);
       y = Phaser.Math.Between(128, worldBounds.y - 128);
       ({ row, col } = getGridCoordinates(x, y));
       isValid = !isCellOccupied(row, col);
-
     } while (!isValid);
 
     let tombstone = tombstones.create(x, y, `tombstone${Math.floor(Math.random() * 5) + 1}`);
     tombstone.setScale(1.5).refreshBody();
+    tombstone.setData('rip', headstoneRips[i]);
+    console.log(tombstone);
 
     markCellsOccupied(row, col);
     allTombstones.push(tombstone);
   }
 };
+
+export function checkTombstoneName(tombstone) {
+  console.log(tombstone.getData('name'))
+  allTombstones.forEach(tombstone => {
+    // console.log('Tombstone name:', tombstone.getData('name'));
+  });
+}
+
 
 export const addBuilding = (scene, x, y, key) => {
   const building = scene.physics.add.staticGroup().create(x, y, key);

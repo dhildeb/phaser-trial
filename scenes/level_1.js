@@ -1,5 +1,5 @@
 
-import { createCommonSceneElements, tombstones, enemies, gameOver, worldBounds, buildingPositions, viewHeight, viewWidth } from "../app.js";
+import { createCommonSceneElements, tombstones, enemies, gameOver, worldBounds, buildingPositions, viewHeight, viewWidth, checkTombstoneName, allTombstones } from "../app.js";
 import { player } from "../player.js";
 import Enemy from "../Enemies/enemy.js";
 
@@ -44,11 +44,18 @@ export class SceneOne extends Phaser.Scene {
     this.physics.add.collider(player.character, buildings, () => {
       if (!this.dialogBox.visible) {
         this.createDialogBox();
-        this.showDialog("You have found the crypt. What secrets lie within?\n\n    Perhaps the clues lie beyond the grave.");
+        this.showDialog('"LOCKED"\n\n\nYou have found the crypt. What secrets lie within?\n\n    Perhaps the clues lie beyond the grave.');
         this.pauseEnemies();
       }
     });
-    this.physics.add.collider(player.character, tombstones);
+    this.physics.add.collider(player.character, tombstones, (character, tombstone) => {
+      if (!this.dialogBox.visible) {
+        this.createDialogBox();
+        this.showDialog(tombstone.getData('rip'));
+        this.pauseEnemies();
+      }
+    });
+
     this.cameras.main.startFollow(player.character);
 
     enemies.push(new Enemy(this, 3, 100, 1));

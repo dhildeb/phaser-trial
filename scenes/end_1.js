@@ -20,7 +20,7 @@ export class EndOneScene extends Phaser.Scene {
   create() {
     this.key = this.add.image(400, 300, 'key').setScale(0.5);
 
-    const dialogText = this.add.text(400, 100, 'A mysterious key! (Achievement unlocked: Tomb Raider)', {
+    const dialogText = this.add.text(600, 100, 'The Crypt Master key! (Achievement unlocked: Grave Digger)', {
       fontSize: '32px',
       fill: '#ffffff'
     }).setOrigin(0.5);
