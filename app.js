@@ -95,7 +95,6 @@ export const generatetombstones = (scene) => {
     let tombstone = tombstones.create(x, y, `tombstone${Math.floor(Math.random() * 5) + 1}`);
     tombstone.setScale(1.5).refreshBody();
     tombstone.setData('rip', headstoneRips[i]);
-    console.log(tombstone);
 
     markCellsOccupied(row, col);
     allTombstones.push(tombstone);

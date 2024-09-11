@@ -1,6 +1,7 @@
 import Enemy from './enemy.js';
 import Item from "../Item.js";
 import { player } from "../player.js";
+import { Items } from "../utils/constants.js";
 
 export default class skeleton extends Enemy {
   constructor(scene, hp, speed, dmg) {
@@ -68,11 +69,8 @@ export default class skeleton extends Enemy {
       let shovel = new Item(this.scene, this.enemy.x, this.enemy.y, 'shovel', 5);
       shovel.setScale(24 / shovel.width);
       this.scene.physics.add.overlap(player.character, shovel, () => {
-        let upgrade = shovel.collect()
-        if (player.dmg < 5) {
-          player.setDmg(upgrade);
-          player.setWeapon('shovel', 0.006857, 0.006857)
-        }
+        shovel.collect()
+        player.collectItem(Items.shovel)
       }, null, this.scene);
     } else {
       let potion = new Item(this.scene, this.enemy.x, this.enemy.y, 'potion', 50);

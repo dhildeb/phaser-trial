@@ -56,7 +56,7 @@ export default class Enemy {
       this.invincible = false;
       this.enemy.setAlpha(1);
       this.slowed = false;
-      this.setSpeed(100);
+      this.setSpeed(this.originalSpeed);
     });
   }
 
@@ -109,7 +109,7 @@ export default class Enemy {
       this.enemy.clearTint();
     });
 
-    this.hp -= player.dmg;
+    this.hp -= dmg;
 
     if (this.hp < 1) {
       this.handleDrop();

@@ -2,16 +2,18 @@ import HealthBar from './HPBar.js'
 import { enemies, tombstones, allTombstones, updateScore, score, setGameOver, worldBounds, viewWidth, viewHeight } from "./app.js";
 import skeleton from "./Enemies/Skeleton.js";
 import Item from "./Item.js";
-import { directionAngles } from "./utils/constants.js"
+import { directionAngles, Items } from "./utils/constants.js"
 import { getWepRangePos, getWepStartPos } from "./utils/weaponHelper.js";
+import Inventory from './Inventory.js';
+import { pauseGame, resumeGame } from "./utils/enemiesHelper.js";
 
 class Player {
   constructor() {
     this.character;
-    this.dmg = 2;
+    this.scene;
     this.pressedKeys = {};
     this.lastPressedKey = null;
-    this.wep = { img: 'rock', xScale: .05, yScale: .05 };
+    this.wep = Items.rock;
     this.hpBar;
     this.attackVisual;
     this.attackDelay;
@@ -22,8 +24,56 @@ class Player {
     this.originalSpeed = this.speed
   }
 
-  setDmg = (dmg) => { this.dmg = dmg }
+  setScene(scene) {
+    this.scene = scene
+    this.inventory = new Inventory(scene, [Items.rock, Items.rock]);
+  }
 
+  collectItem(item) {
+    this.inventory.addItem(item);
+    if (item.type === 'wep') {
+      this.setWeapon(item)
+    }
+  }
+
+  useItem(item) {
+    if (this.inventory.hasItem(item)) {
+      this.inventory.removeItem(item); // Use and remove from inventory
+    } else {
+    }
+  }
+  // Handle player input for inventory selection
+  setupInput(scene) {
+    scene.input.keyboard.on('keydown-RIGHT', () => {
+      this.inventory.selectNextItem();
+    });
+
+    scene.input.keyboard.on('keydown-LEFT', () => {
+      this.inventory.selectPreviousItem();
+    });
+
+    scene.input.keyboard.on('keydown-ENTER', () => {
+      const selectedItem = this.inventory.getSelectedItem();
+      resumeGame()
+      this.removeInput(this.scene)
+      this.inventory.clearVisualInventory()
+      if (selectedItem.type === 'wep') {
+        this.wep = selectedItem
+      }
+    });
+  }
+  removeInput(scene) {
+    scene.input.keyboard.off('keydown-RIGHT');
+    scene.input.keyboard.off('keydown-LEFT');
+    scene.input.keyboard.off('keydown-ENTER');
+  }
+
+  // Call this during the scene update to show the inventory
+  toggleInventory() {
+    this.inventory.createVisualInventory();
+    pauseGame()
+    this.setupInput(this.scene)
+  }
   setupPlayerCreate(scene) {
     this.character = scene.physics.add.sprite(worldBounds.x / 2, worldBounds.y / 2, 'player');
     this.character.setBounce(0.2).setScale(1.5);
@@ -33,6 +83,13 @@ class Player {
     this.powerBar = new HealthBar(scene, viewWidth / 2, viewHeight - 32, 0, 0xFFFF00);
 
     this.cursors = scene.input.keyboard.createCursorKeys();
+    const inventoryKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
+
+    // Listen for the 'I' key press
+    inventoryKey.on('down', () => {
+      this.toggleInventory(); // Call the function to toggle or show inventory
+    });
+
     scene.input.keyboard.on('keydown', (event) => {
       switch (event.code) {
         case 'ArrowUp':
@@ -119,42 +176,64 @@ class Player {
   }
   resetPowerUp = () => {
     if (this.powerLevel >= 50) {
-      this.dmg /= 2
+      this.wep.dmg /= 2
       this.powerBar.setColor(0xFFFF00)
     }
     this.powerLevel = 0;
     this.powerBar.setValue(this.powerLevel);
   }
 
-  setWeapon = (wep, x = 1, y = 1) => {
-    this.wep = { img: wep, xScale: x, yScale: y };
+  setWeapon = (wep) => {
+    this.wep = wep
   }
 
   performAttack(scene) {
     if (this.powerLevel > 50) {
-      this.dmg *= 2;
+      this.wep.dmg *= 2;
     }
     this.attackDelay = true;
 
-    const { wepStartX, wepStartY } = getWepStartPos(this.character.x, this.character.y, this.lastPressedKey, this.wep.img)
+    const { wepStartX, wepStartY } = getWepStartPos(this.character.x, this.character.y, this.lastPressedKey, this.wep.img);
 
     this.attackVisual = scene.physics.add.sprite(wepStartX, wepStartY, this.wep.img);
     this.attackVisual.setVisible(true);
     this.attackVisual.setScale(this.wep.xScale, this.wep.yScale);
-    const isWepShovel = this.wep.img === 'shovel'
+    const isWepShovel = this.wep.img === 'shovel';
     if (isWepShovel) {
-      this.attackVisual.setRotation(directionAngles[this.lastPressedKey])
+      this.attackVisual.setRotation(directionAngles[this.lastPressedKey]);
     }
 
-    const { attackRangeX, attackRangeY } = getWepRangePos(wepStartX, wepStartY, this.lastPressedKey, this.wep.img, this.powerLevel)
+    const { attackRangeX, attackRangeY } = getWepRangePos(wepStartX, wepStartY, this.lastPressedKey, this.wep.img, this.powerLevel);
 
-    const duration = isWepShovel ? 75 : 200
+    const duration = isWepShovel ? 75 : 200;
 
+    // Function to create a trail copy
+    const createTrail = (x, y) => {
+      const trail = scene.add.sprite(x, y, this.wep.img);
+      trail.setScale(this.wep.xScale, this.wep.yScale);
+      trail.setAlpha(0.5); // Faint trail
+      if (isWepShovel) {
+        trail.setRotation(directionAngles[this.lastPressedKey]);
+      }
+
+      scene.tweens.add({
+        targets: trail,
+        alpha: 0, // Fade out
+        duration: 100, // Adjust duration for the trail fade
+        onComplete: () => trail.destroy(),
+      });
+    };
+
+    // Tween for weapon movement with trail effect
     scene.tweens.add({
       targets: this.attackVisual,
       x: attackRangeX,
       y: attackRangeY,
       duration: duration,
+      onUpdate: (tween) => {
+        const { x, y } = this.attackVisual;
+        createTrail(x, y); // Create trail at current position
+      },
       onComplete: () => {
         this.attackVisual.destroy();
         this.attackDelay = false;
@@ -162,7 +241,7 @@ class Player {
     });
 
     scene.physics.moveTo(this.attackVisual, attackRangeX, attackRangeY, duration);
-    scene.physics.add.collider(this.attackVisual, enemies.map(enemy => enemy.enemy), (attackVisual, enemySprite) => {
+    scene.physics.add.overlap(this.attackVisual, enemies.map(enemy => enemy.enemy), (attackVisual, enemySprite) => {
       const enemy = enemies.find(e => e.enemy === enemySprite);
       if (enemy) {
         this.handleAttackHit(enemy, scene);
@@ -206,7 +285,7 @@ class Player {
     if (!enemy || !enemy.enemy) {
       return;
     }
-    const isDead = enemy.handleAttackHit(this.dmg)
+    const isDead = enemy.handleAttackHit(this.wep.dmg)
     if (!isDead) {
       return;
     }
@@ -268,6 +347,7 @@ class Player {
     this.hpBar.setValue(this.hpBar.value - dmg);
     if (this.hpBar.value <= 0) {
       setGameOver(true);
+      pauseGame()
       updateScore('You Lose!');
 
       this.character.setTint(0xff0000);

@@ -1,7 +1,9 @@
 
-import { createCommonSceneElements, tombstones, enemies, gameOver, worldBounds, buildingPositions, viewHeight, viewWidth, checkTombstoneName, allTombstones } from "../app.js";
+import { createCommonSceneElements, tombstones, enemies, gameOver, worldBounds, buildingPositions } from "../app.js";
 import { player } from "../player.js";
 import Enemy from "../Enemies/enemy.js";
+import DialogBox from '../DialogBox.js';
+import { pauseGame } from '../utils/enemiesHelper.js'
 
 export class SceneOne extends Phaser.Scene {
   constructor() {
@@ -30,7 +32,9 @@ export class SceneOne extends Phaser.Scene {
     this.load.spritesheet('enemy', './assets/Wisp.png', { frameWidth: 32, frameHeight: 32 });
   }
   create() {
-    // this.physics.world.createDebugGraphic();
+    player.setScene(this)
+    this.dialogBox = new DialogBox(this);
+
     createCommonSceneElements(this);
     player.setupPlayerCreate(this);
     this.createWorldBorder(this, worldBounds);
@@ -43,74 +47,20 @@ export class SceneOne extends Phaser.Scene {
 
     this.physics.add.collider(player.character, buildings, () => {
       if (!this.dialogBox.visible) {
-        this.createDialogBox();
-        this.showDialog('"LOCKED"\n\n\nYou have found the crypt. What secrets lie within?\n\n    Perhaps the clues lie beyond the grave.');
-        this.pauseEnemies();
+        this.dialogBox.showDialog('"LOCKED"\n\n\nYou have found the crypt. What secrets lie within?\n\n    Perhaps the clues lie beyond the grave.');
+        pauseGame();
       }
     });
     this.physics.add.collider(player.character, tombstones, (character, tombstone) => {
       if (!this.dialogBox.visible) {
-        this.createDialogBox();
-        this.showDialog(tombstone.getData('rip'));
-        this.pauseEnemies();
+        this.dialogBox.showDialog(tombstone.getData('rip'));
+        pauseGame();
       }
     });
 
     this.cameras.main.startFollow(player.character);
 
     enemies.push(new Enemy(this, 3, 100, 1));
-  }
-
-  createDialogBox() {
-    const camera = this.cameras.main;
-
-    this.dialogBox = this.add.graphics();
-    this.dialogBox.fillStyle(0x000000, .95);
-
-    const dialogX = camera.worldView.x;
-    const dialogY = camera.worldView.y;
-
-    this.dialogBox.fillRect(dialogX + 100, dialogY + 100, viewWidth - 200, viewHeight - 200);
-    this.dialogBox.lineStyle(5, 0xffffff);
-    this.dialogBox.strokeRect(dialogX + 100, dialogY + 100, viewWidth - 200, viewHeight - 200);
-    this.dialogText = this.add.text(dialogX + (viewWidth / 2) - 250, dialogY + (viewHeight / 2) - 50, '', { fontSize: '16px', fill: '#ffffff' });
-    this.dialogBox.setVisible(false);
-    this.dialogText.setVisible(false);
-
-
-    this.input.keyboard.on('keydown', () => {
-      this.hideDialog();
-      this.resumeEnemies();
-    });
-  }
-
-  showDialog(text) {
-    this.dialogBox.setVisible(true);
-    this.dialogText.setVisible(true).setText(text);
-    player.setSpeed(0);
-  }
-
-  hideDialog() {
-    this.dialogBox.setVisible(false);
-    this.dialogText.setVisible(false);
-    player.setSpeed(player.originalSpeed);
-  }
-
-  pauseEnemies() {
-    enemies.forEach(enemy => {
-      if (enemy && enemy.enemy) {
-        enemy.savedVelocity = { x: enemy.enemy.body.velocity.x, y: enemy.enemy.body.velocity.y };
-        enemy.setSpeed(0);
-      }
-    });
-  }
-
-  resumeEnemies() {
-    enemies.forEach(enemy => {
-      if (enemy && enemy.enemy && enemy.savedVelocity) {
-        enemy.setSpeed(enemy.originalSpeed);
-      }
-    });
   }
 
   update() {
