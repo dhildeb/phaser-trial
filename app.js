@@ -2,6 +2,7 @@ import { StartScene } from './scenes/start.js';
 import { SceneOne } from './scenes/level_1.js';
 import { SceneTwo } from './scenes/level_2.js';
 import { EndOneScene } from './scenes/end_1.js';
+import { colorWheel } from "./utils/constants.js";
 
 export let viewWidth = $(window).width()
 export let viewHeight = $(window).height()
@@ -33,6 +34,7 @@ var config = {
       debug: false
     }
   },
+  backgroundColor: colorWheel.gray,
   scene: [StartScene, SceneOne, EndOneScene, SceneTwo]
 };
 
@@ -42,8 +44,6 @@ export const createCommonSceneElements = (scene) => {
   scene.physics.world.setBounds(48, 48, worldBounds.x - 72, worldBounds.y - 100);
   scene.cameras.main.setBounds(0, 0, worldBounds.x, worldBounds.y);
   initializeGrid();
-  scoreText = scene.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#ffffff' });
-  scoreText.setScrollFactor(0);
 }
 
 export const updateScore = (newScore) => {

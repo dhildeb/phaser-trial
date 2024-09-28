@@ -1,5 +1,6 @@
 import { viewHeight, viewWidth } from "../app.js";
-import { resumeGame } from "./utils/enemiesHelper.js";
+import { depthMap } from "../utils/constants.js";
+import { resumeGame } from "../utils/enemiesHelper.js";
 
 class DialogBox {
   constructor(scene) {
@@ -26,8 +27,8 @@ class DialogBox {
 
     this.dialogBox.setVisible(false);
     this.dialogText.setVisible(false);
-    this.dialogBox.setDepth(9999);
-    this.dialogText.setDepth(9999);
+    this.dialogBox.setDepth(depthMap.iSeeYou);
+    this.dialogText.setDepth(depthMap.iSeeYou);
   }
 
   updateDialogBoxPosition() {

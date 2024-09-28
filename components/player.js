@@ -1,11 +1,11 @@
 import HealthBar from './HPBar.js'
-import { enemies, tombstones, allTombstones, updateScore, score, setGameOver, worldBounds, viewWidth, viewHeight } from "./app.js";
-import skeleton from "./Enemies/Skeleton.js";
+import { enemies, tombstones, allTombstones, updateScore, score, setGameOver, worldBounds, viewWidth, viewHeight } from "../app.js";
+import skeleton from "../Enemies/Skeleton.js";
 import Item from "./Item.js";
-import { directionAngles, Items } from "./utils/constants.js"
-import { getWepRangePos, getWepStartPos } from "./utils/weaponHelper.js";
+import { directionAngles, Items } from "../utils/constants.js"
+import { getWepRangePos, getWepStartPos } from "../utils/weaponHelper.js";
 import Inventory from './Inventory.js';
-import { pauseGame, resumeGame } from "./utils/enemiesHelper.js";
+import { pauseGame, resumeGame } from "../utils/enemiesHelper.js";
 
 class Player {
   constructor() {
@@ -251,7 +251,6 @@ class Player {
     });
 
     // Check for tombstone hits
-    console.log(tombstones)
     tombstones.getChildren().forEach((tombstone) => {
       if (!isWepShovel) {
         return;

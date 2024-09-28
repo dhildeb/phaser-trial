@@ -1,5 +1,5 @@
 import { enemies } from "../app.js";
-import { player } from "../player.js";
+import { player } from "../components/player.js";
 
 export function pauseGame() {
   enemies.forEach(enemy => {

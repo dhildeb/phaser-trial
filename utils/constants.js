@@ -24,6 +24,14 @@ export const colorWheel = {
   gray: 0x808080
 };
 
+export const depthMap = {
+  iSeeYou: 100,
+  foreground: 50,
+  base: 0,
+  background: -50,
+  getBackThere: -100
+}
+
 export const headstoneRips = [
   "Here lies a gardener buried with his trusty trowel",
   "The crypt master (looks like the grave may have been tampered already)",

@@ -1,6 +1,6 @@
 import Enemy from './enemy.js';
-import { player } from "../player.js";
-import { colorWheel } from "../utils/constants.js";
+import { player } from "../components/player.js";
+import { colorWheel, depthMap } from "../utils/constants.js";
 
 export default class Slime extends Enemy {
   constructor(scene, hp, speed, dmg) {
@@ -86,7 +86,7 @@ export default class Slime extends Enemy {
     trail.body.setAllowGravity(false);
     trail.body.setImmovable(true);
 
-    trail.setDepth(-1);
+    trail.setDepth(depthMap.background);
 
     scene.tweens.add({
       targets: trail,

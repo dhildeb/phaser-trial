@@ -1,10 +1,10 @@
 
 import { createCommonSceneElements, getGridCoordinates, isCellOccupied, markCellsOccupied, tombstones, setTombstones, allTombstones, enemies, gameOver, worldBounds, buildingPositions } from "../app.js";
-import { player } from "../player.js";
+import { player } from "../components/player.js";
 import Enemy from "../Enemies/enemy.js";
-import DialogBox from '../DialogBox.js';
+import DialogBox from '../components/DialogBox.js';
 import { pauseGame } from '../utils/enemiesHelper.js'
-import { headstoneRips } from "../utils/constants.js";
+import { depthMap, headstoneRips } from "../utils/constants.js";
 
 
 export class SceneOne extends Phaser.Scene {
@@ -46,7 +46,7 @@ export class SceneOne extends Phaser.Scene {
     let coor = buildingPositions.find((b) => b.key === 'crypt');
     const crypt = buildings.create(coor.x, coor.y, 'crypt');
 
-    crypt.setOrigin(0.5, 0.5).setDepth(-4);
+    crypt.setOrigin(0.5, 0.5).setDepth(depthMap.base);
 
     this.physics.add.collider(player.character, buildings, () => {
       if (!this.dialogBox.visible) {
@@ -85,7 +85,7 @@ export class SceneOne extends Phaser.Scene {
 
     // Top border
     for (let x = 30; x < worldBounds.x - 64; x += borderWidth) {
-      scene.add.image(x + borderWidth, borderHeight, 'fence_x').setOrigin(0.5, 0.5).setDepth(-5);
+      scene.add.image(x + borderWidth, borderHeight, 'fence_x').setOrigin(0.5, 0.5).setDepth(depthMap.base);
     }
 
     // Bottom border
@@ -95,12 +95,12 @@ export class SceneOne extends Phaser.Scene {
 
     // Left border
     for (let y = 32; y < worldBounds.y - 64; y += borderHeight) {
-      scene.add.image(borderWidth, y + borderHeight, 'fence_y').setOrigin(0.5, 0.5).setDepth(-5);
+      scene.add.image(borderWidth, y + borderHeight, 'fence_y').setOrigin(0.5, 0.5).setDepth(depthMap.base);
     }
 
     // Right border
     for (let y = 32; y < worldBounds.y - 64; y += borderHeight) {
-      scene.add.image(worldBounds.y - borderWidth, y + borderHeight, 'fence_y').setOrigin(0.5, 0.5).setDepth(-5);
+      scene.add.image(worldBounds.y - borderWidth, y + borderHeight, 'fence_y').setOrigin(0.5, 0.5).setDepth(depthMap.base);
     }
   }
 

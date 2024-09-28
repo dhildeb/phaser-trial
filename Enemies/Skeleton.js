@@ -1,6 +1,6 @@
 import Enemy from './enemy.js';
-import Item from "../Item.js";
-import { player } from "../player.js";
+import Item from "../components/Item.js";
+import { player } from "../components/player.js";
 import { Items } from "../utils/constants.js";
 
 export default class skeleton extends Enemy {

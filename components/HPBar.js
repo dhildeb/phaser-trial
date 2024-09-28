@@ -1,3 +1,5 @@
+import { depthMap } from "../utils/constants.js";
+
 export default class HealthBar extends Phaser.GameObjects.Container {
   constructor(scene, x, y, value, color) {
     super(scene, x, y);
@@ -14,6 +16,7 @@ export default class HealthBar extends Phaser.GameObjects.Container {
     this.bar = new Phaser.GameObjects.Graphics(scene);
     this.bar.fillStyle(this.color);
     this.bar.fillRect(2, 2, 96, 16);
+    this.setDepth(depthMap.iSeeYou)
     this.add(this.bar);
 
     this.text = new Phaser.GameObjects.Text(scene, 50, 10, `${value}%`, {
@@ -35,7 +38,7 @@ export default class HealthBar extends Phaser.GameObjects.Container {
     this.bar.scaleX = Phaser.Math.Clamp(value / 100, 0, 1);
     this.value = value;
 
-    this.text.setText(`${value}%`);
+    this.text.setText(`${value.toFixed(0)}%`);
   }
 
   setColor(color) {

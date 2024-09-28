@@ -1,7 +1,7 @@
 import { enemies, tombstones, worldBounds } from '../app.js';
-import { generateRandomID } from "../util.js";
-import Item from "../Item.js";
-import { player } from "../player.js";
+import { generateRandomID } from "../utils/idGenerator.js";
+import Item from "../components/Item.js";
+import { player } from "../components/player.js";
 
 export default class Enemy {
   constructor(scene, hp, speed, dmg) {
