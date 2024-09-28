@@ -43,7 +43,7 @@ export class EndOneScene extends Phaser.Scene {
           dialogText.setText(this.oldManDialog[this.dialogIndex]);
           this.dialogIndex++;
         } else {
-          this.scene.start('SceneOne');
+          this.scene.start('SceneTwo');
         }
       }
     });

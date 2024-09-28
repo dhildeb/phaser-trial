@@ -13,7 +13,7 @@ export const directionAngles = {
 export const colorWheel = {
   red: 0xff0000,
   green: 0x00ff00,
-  blue: 0x0000ff,
+  blue: 0x1E90FF,
   yellow: 0xffff00,
   white: 0xffffff,
   black: 0x000000,

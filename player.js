@@ -22,11 +22,12 @@ class Player {
     this.powerBar;
     this.speed = 200
     this.originalSpeed = this.speed
+    this.hasControl = true
   }
 
   setScene(scene) {
     this.scene = scene
-    this.inventory = new Inventory(scene, [Items.rock, Items.rock]);
+    this.inventory = new Inventory(scene, [Items.rock, Items.shovel]);
   }
 
   collectItem(item) {
@@ -250,6 +251,7 @@ class Player {
     });
 
     // Check for tombstone hits
+    console.log(tombstones)
     tombstones.getChildren().forEach((tombstone) => {
       if (!isWepShovel) {
         return;
@@ -308,6 +310,10 @@ class Player {
     let velocityY = 0;
     let direction = '';
 
+    if (!this.hasControl) {
+      return
+    }
+
     // Determine movement direction based on pressed keys
     if (this.pressedKeys['ArrowUp']) {
       velocityY = -this.speed;
@@ -328,6 +334,10 @@ class Player {
 
     // Move player and play animation based on direction
     this.movePlayer(velocityX, velocityY, direction);
+  }
+
+  setHasControl(control) {
+    this.hasControl = control
   }
 
   movePlayer(velocityX, velocityY, direction) {

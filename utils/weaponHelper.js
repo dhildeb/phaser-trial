@@ -76,8 +76,6 @@ export function getWepRangePos(x, y, lastPressedKey, wepType, powerLevel) {
         attackRangeX += powerLevel;
         attackRangeY += powerLevel;
         break;
-      default:
-        return;
     }
     return { attackRangeX, attackRangeY }
   }
@@ -111,8 +109,6 @@ export function getWepRangePos(x, y, lastPressedKey, wepType, powerLevel) {
       attackRangeX -= 20
       attackRangeY += 20
       break;
-    default:
-      return;
   }
 
   return { attackRangeX, attackRangeY }

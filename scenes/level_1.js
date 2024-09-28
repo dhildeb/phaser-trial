@@ -1,9 +1,11 @@
 
-import { createCommonSceneElements, tombstones, enemies, gameOver, worldBounds, buildingPositions } from "../app.js";
+import { createCommonSceneElements, getGridCoordinates, isCellOccupied, markCellsOccupied, tombstones, setTombstones, allTombstones, enemies, gameOver, worldBounds, buildingPositions } from "../app.js";
 import { player } from "../player.js";
 import Enemy from "../Enemies/enemy.js";
 import DialogBox from '../DialogBox.js';
 import { pauseGame } from '../utils/enemiesHelper.js'
+import { headstoneRips } from "../utils/constants.js";
+
 
 export class SceneOne extends Phaser.Scene {
   constructor() {
@@ -36,6 +38,7 @@ export class SceneOne extends Phaser.Scene {
     this.dialogBox = new DialogBox(this);
 
     createCommonSceneElements(this);
+    generatetombstones(this);
     player.setupPlayerCreate(this);
     this.createWorldBorder(this, worldBounds);
 
@@ -102,3 +105,38 @@ export class SceneOne extends Phaser.Scene {
   }
 
 }
+
+export const generatetombstones = (scene) => {
+  setTombstones(scene.physics.add.staticGroup())
+  let x, y, row, col, isValid;
+
+  for (let i = 0; i < 20; i++) {
+    do {
+      x = Phaser.Math.Between(128, worldBounds.x - 128);
+      y = Phaser.Math.Between(128, worldBounds.y - 128);
+      ({ row, col } = getGridCoordinates(x, y));
+      isValid = !isCellOccupied(row, col);
+    } while (!isValid);
+
+    let tombstone = tombstones.create(x, y, `tombstone${Math.floor(Math.random() * 5) + 1}`);
+    tombstone.setScale(1.5).refreshBody();
+    tombstone.setData('rip', headstoneRips[i]);
+
+    markCellsOccupied(row, col);
+    allTombstones.push(tombstone);
+  }
+};
+
+export function checkTombstoneName(tombstone) {
+  console.log(tombstone.getData('name'))
+  allTombstones.forEach(tombstone => {
+    // console.log('Tombstone name:', tombstone.getData('name'));
+  });
+}
+
+
+export const addBuilding = (scene, x, y, key) => {
+  const building = scene.physics.add.staticGroup().create(x, y, key);
+  markCellsOccupied(x, y, building.displayWidth, building.displayHeight);
+  return building;
+};
