@@ -76,7 +76,6 @@ class Player {
     this.setupInput(this.scene)
   }
   setupPlayerCreate(scene) {
-    this.character = scene.physics.add.sprite(worldBounds.x / 2, worldBounds.y / 2, 'player');
     this.character.setBounce(0.2).setScale(1.5);
     this.character.setCollideWorldBounds(true);
 
@@ -188,6 +187,7 @@ class Player {
     this.wep = wep
   }
 
+  // TODO refactor attack function
   performAttack(scene) {
     if (this.powerLevel > 50) {
       this.wep.dmg *= 2;
@@ -259,6 +259,8 @@ class Player {
         this.handleTombstoneHit(scene, tombstone);
       }
     });
+
+
   }
 
   handleTombstoneHit(scene, tombstone) {
