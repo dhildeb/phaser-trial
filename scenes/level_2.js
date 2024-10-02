@@ -15,7 +15,7 @@ const tileKeys = ['tile', 'tile1', 'tile2', 'tile3'];
 const goalx = [96, 288, 384, 512, 704, 896, 640]
 const goaly = [512, 768, 160, 352, 640, 64, 32]
 const trapsx = [192, 512, 64, 224, 960, 32]
-const trapsy = [192, 128, 768, 0, 384, 288]
+const trapsy = [192, 128, 768, 32, 384, 288]
 
 export class SceneTwo extends Phaser.Scene {
   constructor() {
@@ -61,6 +61,9 @@ export class SceneTwo extends Phaser.Scene {
     dimLight.setDepth(depthMap.iSeeYou - 1);
 
     this.cameras.main.startFollow(player.character);
+    enemies.push(new Slime(this, 500, 10, .1));
+    enemies.push(new Slime(this, 500, 10, .1));
+    enemies.push(new Slime(this, 500, 10, .1));
     enemies.push(new Slime(this, 500, 10, .1));
     enemies.push(new Slime(this, 500, 10, .1));
     enemies.push(new Slime(this, 500, 10, .1));
