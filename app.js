@@ -15,7 +15,6 @@ export const setTombstones = (newTombstones) => {
 export let allTombstones = [];
 export let enemies = [];
 export let score = 0;
-export let scoreText;
 export let gameOver;
 
 export let buildingPositions = [{ key: 'crypt', x: 1024, y: 896 }]
@@ -46,11 +45,6 @@ export const createCommonSceneElements = (scene) => {
   initializeGrid();
 }
 
-export const updateScore = (newScore) => {
-  score = newScore
-  scoreText.setText('Score: ' + newScore);
-}
-
 const initializeGrid = () => {
   const crypt = buildingPositions.find((b) => b.key === 'crypt')
   const max = crypt.x / GRID_SIZE + 1
@@ -79,7 +73,6 @@ export const getGridCoordinates = (x, y) => {
 
 export const handleVictory = () => {
   gameOver = true;
-  updateScore('You Win!');
 }
 
 export const setGameOver = (gameBool) => {

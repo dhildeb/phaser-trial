@@ -58,7 +58,7 @@ export default class Slime extends Enemy {
 
   updateEnemyMovement() {
     const distance = Phaser.Math.Distance.Between(player.character.x, player.character.y, this.enemy.x, this.enemy.y);
-    if (distance > 200) {
+    if (distance > 512) {
       this.enemy.setVelocity(0);
       this.enemy.anims.stop();
       return;
@@ -80,13 +80,13 @@ export default class Slime extends Enemy {
 
   createTrailPart(scene, x, y) {
     const trail = scene.add.circle(x, y + 4, 6, colorWheel.blue);
-
+    trail.setAlpha(0.01); // transparency
     scene.physics.world.enable(trail);
     trail.body.setCircle(6);
     trail.body.setAllowGravity(false);
     trail.body.setImmovable(true);
 
-    trail.setDepth(depthMap.background);
+    trail.setDepth(depthMap.background + 1);
 
     scene.tweens.add({
       targets: trail,

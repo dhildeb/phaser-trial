@@ -1,5 +1,5 @@
 import HealthBar from './HPBar.js'
-import { enemies, tombstones, allTombstones, updateScore, score, setGameOver, worldBounds, viewWidth, viewHeight } from "../app.js";
+import { enemies, tombstones, allTombstones, score, setGameOver, worldBounds, viewWidth, viewHeight } from "../app.js";
 import skeleton from "../Enemies/Skeleton.js";
 import Item from "./Item.js";
 import { directionAngles, Items } from "../utils/constants.js"
@@ -292,7 +292,6 @@ class Player {
     if (!isDead) {
       return;
     }
-    updateScore(score + 1);
     if (Math.random() < 0.3) {
       scene.time.delayedCall(500, () => {
         enemies.push(new skeleton(scene, 25, 75, 5))
@@ -359,7 +358,6 @@ class Player {
     if (this.hpBar.value <= 0) {
       setGameOver(true);
       pauseGame()
-      updateScore('You Lose!');
 
       this.character.setTint(0xff0000);
       this.character.anims.play('turn');
