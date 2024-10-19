@@ -2,6 +2,7 @@ import { enemies, tombstones, worldBounds } from '../app.js';
 import { generateRandomID } from "../utils/idGenerator.js";
 import Item from "../components/Item.js";
 import { player } from "../components/player.js";
+import { colorWheel } from "../utils/constants.js";
 
 export default class Enemy {
   constructor(scene, hp, speed, dmg) {
@@ -103,7 +104,7 @@ export default class Enemy {
     if (this.invincible) {
       return;
     }
-    this.enemy.setTint(0xff0000);
+    this.enemy.setTint(colorWheel.red);
 
     this.scene.time.delayedCall(200, () => {
       this.enemy.clearTint();

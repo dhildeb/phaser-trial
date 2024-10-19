@@ -2,7 +2,7 @@ import HealthBar from './HPBar.js'
 import { enemies, tombstones, allTombstones, score, setGameOver, worldBounds, viewWidth, viewHeight } from "../app.js";
 import skeleton from "../Enemies/Skeleton.js";
 import Item from "./Item.js";
-import { directionAngles, Items } from "../utils/constants.js"
+import { colorWheel, directionAngles, Items } from "../utils/constants.js"
 import { getWepRangePos, getWepStartPos } from "../utils/weaponHelper.js";
 import Inventory from './Inventory.js';
 import { pauseGame, resumeGame } from "../utils/enemiesHelper.js";
@@ -356,11 +356,14 @@ class Player {
 
   handlePlayerDamaged(dmg) {
     this.hpBar.setValue(this.hpBar.value - dmg);
+    this.character.setTint(colorWheel.red);
+
+    this.scene.time.delayedCall(150, () => {
+      this.character.clearTint()
+    })
     if (this.hpBar.value <= 0) {
       setGameOver(true);
       pauseGame()
-
-      this.character.setTint(0xff0000);
       this.character.anims.play('turn');
     }
   }

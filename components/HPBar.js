@@ -1,11 +1,11 @@
-import { depthMap } from "../utils/constants.js";
+import { colorWheel, depthMap } from "../utils/constants.js";
 
 export default class HealthBar extends Phaser.GameObjects.Container {
   constructor(scene, x, y, value, color) {
     super(scene, x, y);
     this.scene = scene;
     this.value = value;
-    this.color = color || 0xff0000;
+    this.color = color || colorWheel.red;
 
     // Create the background of the health bar (gray bar)
     this.bg = new Phaser.GameObjects.Graphics(scene);

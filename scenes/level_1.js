@@ -37,7 +37,7 @@ export class SceneOne extends Phaser.Scene {
     player.setScene(this)
     this.dialogBox = new DialogBox(this);
 
-    createCommonSceneElements(this);
+    createCommonSceneElements(this, { x: 72, y: 100 });
     generatetombstones(this);
     player.character = this.physics.add.sprite(worldBounds.x / 2, worldBounds.y / 2, 'player');
     player.setupPlayerCreate(this);

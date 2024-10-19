@@ -39,8 +39,8 @@ var config = {
 
 new Phaser.Game(config);
 
-export const createCommonSceneElements = (scene) => {
-  scene.physics.world.setBounds(48, 48, worldBounds.x - 72, worldBounds.y - 100);
+export const createCommonSceneElements = (scene, paremeter = { x: 0, y: 0 }) => {
+  scene.physics.world.setBounds(48, 48, worldBounds.x - paremeter.x, worldBounds.y - paremeter.y);
   scene.cameras.main.setBounds(0, 0, worldBounds.x, worldBounds.y);
   initializeGrid();
 }

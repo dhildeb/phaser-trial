@@ -3,7 +3,7 @@ import { createCommonSceneElements, setTombstones, gameOver, enemies, worldBound
 import { player } from "../components/player.js";
 import DialogBox from '../components/DialogBox.js';
 import Slime from "../Enemies/Slime.js";
-import { depthMap, Items } from "../utils/constants.js";
+import { colorWheel, depthMap, Items } from "../utils/constants.js";
 
 let darkness;
 let dimLight;
@@ -48,8 +48,8 @@ export class SceneTwo extends Phaser.Scene {
     this.load.image('tileTrap', './assets/tile_trap.png');
     this.load.spritesheet('player', './assets/scared_little_girl.png', { frameWidth: 20, frameHeight: 29 });
     this.load.spritesheet('slime', './assets/slime.png', { frameWidth: 32, frameHeight: 25 });
-    worldBounds.x = 1024
-    worldBounds.y = 1024
+    worldBounds.x = 1024//2048
+    worldBounds.y = 1024//2048
   }
   create() {
     player.setScene(this)
@@ -126,7 +126,7 @@ export class SceneTwo extends Phaser.Scene {
       this.handleGoalTouch(goalTile);
     }, null, this);
     this.physics.add.overlap(trapTiles, player.character, (player, trapTile) => {
-      this.handleTrapTouch();
+      this.handleTrapTouch(this, trapTile);
     }, null, this);
   }
 
@@ -142,8 +142,16 @@ export class SceneTwo extends Phaser.Scene {
     }
   }
 
-  handleTrapTouch() {
+  handleTrapTouch(scene, trap) {
     if (currentRunes.length > 0) {
+      scene.tweens.add({
+        targets: trap,
+        tint: colorWheel.red,
+        ease: 'Cubic.easeOut',
+        duration: 200,
+        yoyo: true,
+        repeat: 0
+      });
       currentRunes = ''
       goalTiles.children.entries.forEach(tile => tile.touched = false);
       player.handlePlayerDamaged(5)
