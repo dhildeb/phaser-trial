@@ -1,3 +1,5 @@
+import { depthMap } from "../utils/constants.js";
+
 class Inventory {
   constructor(scene, items = []) {
     this.scene = scene; // Reference to the Phaser scene
@@ -52,7 +54,7 @@ class Inventory {
     this.inventoryBox.fillRect(dialogX, dialogY, boxWidth, boxHeight);
     this.inventoryBox.lineStyle(2, 0xffffff);
     this.inventoryBox.strokeRect(dialogX, dialogY, boxWidth, boxHeight);
-
+    this.inventoryBox.setDepth(depthMap.iSeeYou)
     const startX = dialogX + 20;
     const startY = dialogY + 20;
     const spacing = 30;
@@ -61,8 +63,9 @@ class Inventory {
     this.items.forEach((item, index) => {
       let itemImage = this.scene.add.image(startX + index * spacing, startY, item.img);
 
-      itemImage.setScale(item.xScale, item.yScale);
-      itemImage.setTint(this.selectedIndex === index ? 0x00FF00 : 0xFFFFFF);
+      itemImage.setScale(item.xScale, item.yScale)
+        .setTint(this.selectedIndex === index ? 0x00FF00 : 0xFFFFFF)
+        .setDepth(depthMap.iSeeYou);
       this.inventoryGraphics.push(itemImage);
     });
 

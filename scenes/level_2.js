@@ -3,20 +3,33 @@ import { createCommonSceneElements, setTombstones, gameOver, enemies, worldBound
 import { player } from "../components/player.js";
 import DialogBox from '../components/DialogBox.js';
 import Slime from "../Enemies/Slime.js";
-import { depthMap } from "../utils/constants.js";
+import { depthMap, Items } from "../utils/constants.js";
 
 let darkness;
 let dimLight;
-let countDown = 0;
+let currentRunes = '';
 let goalsHit = [];
-let countdownTimer;
-let countdownText;
+let displayRuneText;
 const tileKeys = ['tile', 'tile1', 'tile2', 'tile3'];
-const goalx = [96, 288, 384, 512, 704, 896, 640]
-const goaly = [512, 768, 160, 352, 640, 64, 32]
-const trapsx = [192, 512, 64, 224, 960, 32]
-const trapsy = [192, 128, 768, 32, 384, 288]
+const runes = ['manea', 'prantika', 'amaia']
+const choosenRune = Phaser.Utils.Array.GetRandom(runes)
+const otherRunes = ['r', '⎝', 'ϓ', 'd', 'o', '₷', 'f', 'g', 'l', 'c', 'b', '*', '~', 'ʘ', 'ʖ', 'ɘ', 'Φ', 'Σ', 'Ϟ', 'Ϯ', '₪', '↫', '≋', '⎎', 's', 'h', 'c', '☥', 'u', '⚔']
+function generateValues(count) {
+  const values = [];
+  for (let i = 0; i < count; i++) {
+    const value = Phaser.Math.Between(1, 32) * 32;
+    values.push(value);
+  }
+  return values;
+}
 
+const goalx = generateValues(choosenRune.length)
+const goaly = generateValues(choosenRune.length)
+const trapsx = generateValues(12)
+const trapsy = generateValues(12)
+console.log(goalx)
+let goalTiles;
+let trapTiles;
 export class SceneTwo extends Phaser.Scene {
   constructor() {
     super({ key: 'SceneTwo' });
@@ -28,6 +41,7 @@ export class SceneTwo extends Phaser.Scene {
     this.load.image('potion', './assets/holy_water.png');
     this.load.image('jar', './assets/jar.png');
     this.load.image('shovel', './assets/shovel.png');
+    this.load.image('torch', './assets/Torch_Gif.gif');
     this.load.image('tile', './assets/tile.png');
     this.load.image('tile1', './assets/tile_1.png');
     this.load.image('tile2', './assets/tile_2.png');
@@ -66,19 +80,26 @@ export class SceneTwo extends Phaser.Scene {
     enemies.push(new Slime(this, 500, 10, .1));
     enemies.push(new Slime(this, 500, 10, .1));
     enemies.push(new Slime(this, 500, 10, .1));
-    enemies.push(new Slime(this, 500, 10, .1));
     const jar = this.physics.add.staticGroup();
     const lightJar = jar.create(worldBounds.x - 50, worldBounds.y - 200, 'jar');
     this.physics.add.overlap(lightJar, player.character, () => {
       if (!player.hasTorch) {
         this.setTorchLighting()
+        player.hasTorch = true;
+        player.collectItem(Items.torch)
       }
     }, null, this);
+    displayRuneText = this.add.text(10, 10, currentRunes, {
+      fontSize: '32px',
+      fill: '#ffffff',
+      fontFamily: 'Cinzel Decorative',
+      align: 'center'
+    });
   }
 
   setTiles() {
-    const goalTiles = this.physics.add.staticGroup();
-    const trapTiles = this.physics.add.staticGroup();
+    goalTiles = this.physics.add.staticGroup();
+    trapTiles = this.physics.add.staticGroup();
     // Create the background with random tiles
     for (let x = -32; x < worldBounds.x; x += 32) {
       for (let y = -32; y < worldBounds.y; y += 32) {
@@ -86,71 +107,57 @@ export class SceneTwo extends Phaser.Scene {
         this.add.image(x, y, selectedTile).setOrigin(0).setDepth(depthMap.background);
       }
     }
-
-    for (let i = 0; i < goalx.length; i++) {
-      const goalTile = goalTiles.create(goalx[i], goaly[i], 'tileGoal').setOrigin(0).setDepth(depthMap.background);
+    // Set Goal tiles
+    for (let i = 0; i < [...choosenRune].length; i++) {
+      const goalTile = goalTiles.create(goalx[i], goaly[i], Phaser.Utils.Array.GetRandom(tileKeys)).setOrigin(0).setDepth(depthMap.background);
       goalTile.body.setSize(32, 32).setOffset(48, 48);
       goalTile.goalId = i;
+      goalTile.rune = [...choosenRune][i]
+      const text = this.add.text(goalTile.x + 24, goalTile.y + 17, [...choosenRune][i], { fontSize: '22px', color: '#ff0000', fontFamily: 'Cinzel Decorative', align: 'center' })
+        .setDepth(depthMap.background);
     }
+    // Set trap tiles
     for (let i = 0; i < trapsx.length; i++) {
-      const trapTile = trapTiles.create(trapsx[i], trapsy[i], 'tileTrap').setOrigin(0).setDepth(depthMap.background);
+      const trapTile = trapTiles.create(trapsx[i], trapsy[i], Phaser.Utils.Array.GetRandom(tileKeys)).setOrigin(0).setDepth(depthMap.background);
       trapTile.body.setSize(32, 32).setOffset(48, 48);
+      const text = this.add.text(trapTile.x + 24, trapTile.y + 16, Phaser.Utils.Array.GetRandom(otherRunes), { fontSize: '22px', color: '#ff0000', fontFamily: 'Cinzel Decorative', align: 'center' })
+        .setDepth(depthMap.background);
     }
 
 
     this.physics.add.overlap(goalTiles, player.character, (player, goalTile) => {
-      this.handleGoalTouch(goalTile.goalId);
+      this.handleGoalTouch(goalTile);
     }, null, this);
     this.physics.add.overlap(trapTiles, player.character, (player, trapTile) => {
       this.handleTrapTouch();
     }, null, this);
   }
 
-  handleTrapTouch() {
-    player.handlePlayerDamaged(1)
-  }
-
-  handleGoalTouch(goalId) {
-    if (goalsHit.find((goal) => goal == goalId) === undefined) {
-      countDown += goalId < 4 ? goalId : 3
-      goalsHit.push(goalId)
-      if (goalsHit.length === 1) {
-        countdownTimer = this.time.addEvent({
-          delay: 1000,
-          callback: this.updateCountdown,
-          callbackScope: this,
-          loop: true
-        });
-        countdownText = this.add.text(10, 10, countDown, {
-          fontSize: '32px',
-          fill: '#ffffff',
-          fontFamily: 'Arial',
-          align: 'center'
-        });
-        countdownText.setDepth(depthMap.iSeeYou).setScrollFactor(0);
-      }
-      if (goalsHit.length === goalx.length) {
-        countdownText.setText('You did it!')
-      }
-      countdownText.setText(countDown);
+  handleGoalTouch(tile) {
+    if (!tile.touched && [...choosenRune][currentRunes.length] === tile.rune) {
+      currentRunes += tile.rune
+      displayRuneText.setDepth(depthMap.iSeeYou).setScrollFactor(0);
+      tile.touched = true
+      displayRuneText.setText(currentRunes);
+    }
+    if (currentRunes === choosenRune) {
+      displayRuneText.setText('You did it!')
     }
   }
 
-  updateCountdown() {
-    countDown--;
-    countdownText.setText(countDown);
-    if (countDown < 0) {
-      countDown = 0
-      goalsHit = []
-      countdownTimer.remove();
-      countdownText.destroy();
+  handleTrapTouch() {
+    if (currentRunes.length > 0) {
+      currentRunes = ''
+      goalTiles.children.entries.forEach(tile => tile.touched = false);
+      player.handlePlayerDamaged(5)
+      displayRuneText.setText(currentRunes);
     }
   }
 
   setTorchLighting() {
     const torchMaskShape = this.make.graphics({ x: 0, y: 0, add: false });
     torchMaskShape.fillStyle(0xffffff);
-    torchMaskShape.fillCircle(0, 0, 50);
+    torchMaskShape.fillCircle(0, 0, 75);
 
     const torchMask = torchMaskShape.createGeometryMask();
     torchMask.invertAlpha = true;
@@ -158,7 +165,7 @@ export class SceneTwo extends Phaser.Scene {
 
     const dimLightMaskShape = this.make.graphics({ x: 0, y: 0, add: false });
     dimLightMaskShape.fillStyle(0xffffff);
-    dimLightMaskShape.fillCircle(0, 0, 100);
+    dimLightMaskShape.fillCircle(0, 0, 225);
 
     const dimLightMask = dimLightMaskShape.createGeometryMask();
     dimLightMask.invertAlpha = true;
@@ -168,8 +175,6 @@ export class SceneTwo extends Phaser.Scene {
       torchMaskShape.setPosition(player.character.x, player.character.y);
       dimLightMaskShape.setPosition(player.character.x, player.character.y);
     });
-
-    player.hasTorch = true;
   }
 
 

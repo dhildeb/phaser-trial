@@ -292,13 +292,14 @@ class Player {
     if (!isDead) {
       return;
     }
-    if (Math.random() < 0.3) {
+    if (scene.scene.key == 'SceneOne' && Math.random() < 0.3) {
       scene.time.delayedCall(500, () => {
         enemies.push(new skeleton(scene, 25, 75, 5))
       });
     }
-
-    enemy.respawnEnemy(scene);
+    if (scene.scene.key == 'SceneOne') {
+      enemy.respawnEnemy(scene);
+    }
   }
 
   setSpeed(newSpeed) {
