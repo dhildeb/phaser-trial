@@ -27,7 +27,7 @@ class Player {
 
   setScene(scene) {
     this.scene = scene
-    this.inventory = new Inventory(scene, [Items.rock, Items.shovel]);
+    this.inventory = new Inventory(scene, [Items.rock]);
   }
 
   collectItem(item) {

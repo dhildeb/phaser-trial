@@ -33,7 +33,7 @@ var config = {
       debug: false
     }
   },
-  backgroundColor: colorWheel.gray,
+  // backgroundColor: colorWheel.gray,
   scene: [StartScene, SceneOne, EndOneScene, SceneTwo]
 };
 

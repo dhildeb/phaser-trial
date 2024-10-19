@@ -8,7 +8,6 @@ import { depthMap, Items } from "../utils/constants.js";
 let darkness;
 let dimLight;
 let currentRunes = '';
-let goalsHit = [];
 let displayRuneText;
 const tileKeys = ['tile', 'tile1', 'tile2', 'tile3'];
 const runes = ['manea', 'prantika', 'amaia']
@@ -17,7 +16,7 @@ const otherRunes = ['r', '⎝', 'ϓ', 'd', 'o', '₷', 'f', 'g', 'l', 'c', 'b', 
 function generateValues(count) {
   const values = [];
   for (let i = 0; i < count; i++) {
-    const value = Phaser.Math.Between(1, 32) * 32;
+    const value = Phaser.Math.Between(3, 31) * 32;
     values.push(value);
   }
   return values;
@@ -27,7 +26,6 @@ const goalx = generateValues(choosenRune.length)
 const goaly = generateValues(choosenRune.length)
 const trapsx = generateValues(12)
 const trapsy = generateValues(12)
-console.log(goalx)
 let goalTiles;
 let trapTiles;
 export class SceneTwo extends Phaser.Scene {
@@ -124,7 +122,6 @@ export class SceneTwo extends Phaser.Scene {
         .setDepth(depthMap.background);
     }
 
-
     this.physics.add.overlap(goalTiles, player.character, (player, goalTile) => {
       this.handleGoalTouch(goalTile);
     }, null, this);
@@ -176,7 +173,6 @@ export class SceneTwo extends Phaser.Scene {
       dimLightMaskShape.setPosition(player.character.x, player.character.y);
     });
   }
-
 
   update() {
     if (!gameOver) {

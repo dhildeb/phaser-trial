@@ -15,7 +15,6 @@ class Inventory {
   addItem(item) {
     if (this.items.length < this.capacity) {
       this.items.push(item);
-      this.createVisualInventory(); // Update visuals after adding
       console.log(`${item} added to inventory.`);
     } else {
       console.log("Inventory is full!");
