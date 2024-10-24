@@ -12,7 +12,8 @@ let displayRuneText;
 const tileKeys = ['tile', 'tile1', 'tile2', 'tile3'];
 const runes = ['manea', 'prantika', 'amaia']
 const choosenRune = Phaser.Utils.Array.GetRandom(runes)
-const otherRunes = ['r', '⎝', 'ϓ', 'd', 'o', '₷', 'f', 'g', 'l', 'c', 'b', '*', '~', 'ʘ', 'ʖ', 'ɘ', 'Φ', 'Σ', 'Ϟ', 'Ϯ', '₪', '↫', '≋', '⎎', 's', 'h', 'c', '☥', 'u', '⚔']
+const otherRunes = ['r', '⎝', 'w', 'd', 'o', 'f', 'g', 'l', 'c', 'b', '₷', 'ɘ', 'Σ', '≋', '⎎', 's', 'h', '☥', 'u']
+// ['r', '⎝', 'ϓ', 'd', 'o', '₷', 'f', 'g', 'l', 'c', 'b', '*', '~', 'ʘ', 'ʖ', 'ɘ', 'Φ', 'Σ', 'Ϟ', 'Ϯ', '₪', '↫', '≋', '⎎', 's', 'h', 'c', '☥', 'u', '⚔']
 function generateValues(count) {
   const values = [];
   for (let i = 0; i < count; i++) {
@@ -24,8 +25,8 @@ function generateValues(count) {
 
 const goalx = generateValues(choosenRune.length)
 const goaly = generateValues(choosenRune.length)
-const trapsx = generateValues(12)
-const trapsy = generateValues(12)
+const trapsx = generateValues(19)
+const trapsy = generateValues(19)
 let goalTiles;
 let trapTiles;
 export class SceneTwo extends Phaser.Scene {
@@ -73,11 +74,11 @@ export class SceneTwo extends Phaser.Scene {
     dimLight.setDepth(depthMap.iSeeYou - 1);
 
     this.cameras.main.startFollow(player.character);
-    enemies.push(new Slime(this, 500, 10, .1));
-    enemies.push(new Slime(this, 500, 10, .1));
-    enemies.push(new Slime(this, 500, 10, .1));
-    enemies.push(new Slime(this, 500, 10, .1));
-    enemies.push(new Slime(this, 500, 10, .1));
+    enemies.push(new Slime(this, 500, 10, 0));
+    enemies.push(new Slime(this, 500, 10, 0));
+    enemies.push(new Slime(this, 500, 10, 0));
+    enemies.push(new Slime(this, 500, 10, 0));
+    enemies.push(new Slime(this, 500, 10, 0));
     const jar = this.physics.add.staticGroup();
     const lightJar = jar.create(worldBounds.x - 50, worldBounds.y - 200, 'jar');
     this.physics.add.overlap(lightJar, player.character, () => {
@@ -90,7 +91,7 @@ export class SceneTwo extends Phaser.Scene {
     displayRuneText = this.add.text(10, 10, currentRunes, {
       fontSize: '32px',
       fill: '#ffffff',
-      fontFamily: 'Cinzel Decorative',
+      fontFamily: 'MedievalSharp',
       align: 'center'
     });
   }
@@ -111,14 +112,14 @@ export class SceneTwo extends Phaser.Scene {
       goalTile.body.setSize(32, 32).setOffset(48, 48);
       goalTile.goalId = i;
       goalTile.rune = [...choosenRune][i]
-      const text = this.add.text(goalTile.x + 24, goalTile.y + 17, [...choosenRune][i], { fontSize: '22px', color: '#ff0000', fontFamily: 'Cinzel Decorative', align: 'center' })
+      const text = this.add.text(goalTile.x + 24, goalTile.y + 17, [...choosenRune][i], { fontSize: '22px', color: '#ff0000', fontFamily: 'MedievalSharp', align: 'center' })
         .setDepth(depthMap.background);
     }
     // Set trap tiles
     for (let i = 0; i < trapsx.length; i++) {
       const trapTile = trapTiles.create(trapsx[i], trapsy[i], Phaser.Utils.Array.GetRandom(tileKeys)).setOrigin(0).setDepth(depthMap.background);
       trapTile.body.setSize(32, 32).setOffset(48, 48);
-      const text = this.add.text(trapTile.x + 24, trapTile.y + 16, Phaser.Utils.Array.GetRandom(otherRunes), { fontSize: '22px', color: '#ff0000', fontFamily: 'Cinzel Decorative', align: 'center' })
+      const text = this.add.text(trapTile.x + 24, trapTile.y + 16, Phaser.Utils.Array.GetRandom(otherRunes), { fontSize: '22px', color: '#ff0000', fontFamily: 'MedievalSharp', align: 'center' })
         .setDepth(depthMap.background);
     }
 
@@ -138,6 +139,7 @@ export class SceneTwo extends Phaser.Scene {
       displayRuneText.setText(currentRunes);
     }
     if (currentRunes === choosenRune) {
+      sessionStorage.setItem('secretName', choosenRune)
       displayRuneText.setText('You did it!')
     }
   }

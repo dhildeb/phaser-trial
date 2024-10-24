@@ -50,9 +50,18 @@ export default class Slime extends Enemy {
   }
 
   createTrail(scene) {
-    this.trailGroup = scene.add.group({
+    this.trailGroup = scene.physics.add.group({
       classType: Phaser.GameObjects.Sprite,
       runChildUpdate: true
+    });
+    scene.physics.add.overlap(player.character, this.trailGroup, () => {
+      if (!player.hasControl) { return }
+      player.setHasControl(false)
+      player.character.setTint(colorWheel.blue)
+      scene.time.delayedCall(750, () => {
+        player.setHasControl(true)
+        player.character.clearTint()
+      })
     });
   }
 
@@ -79,32 +88,36 @@ export default class Slime extends Enemy {
   }
 
   createTrailPart(scene, x, y) {
+    // Create the trail part using a circle
     const trail = scene.add.circle(x, y + 4, 6, colorWheel.blue);
     trail.setAlpha(0.01); // transparency
-    scene.physics.world.enable(trail);
+
+    // Add physics to the trail
+    scene.physics.add.existing(trail);
+
+    // Set up physics properties for the trail body
     trail.body.setCircle(6);
     trail.body.setAllowGravity(false);
     trail.body.setImmovable(true);
 
+    // Set trail depth
     trail.setDepth(depthMap.background + 1);
 
+    // Create a tween to slowly fade out and destroy the trail part
     scene.tweens.add({
       targets: trail,
-      alpha: 0,
+      alpha: { from: .05, to: 0.01 },
       duration: 60000,
-      onComplete: () => trail.destroy(),
+      onComplete: () => {
+        trail.body.enable = false;
+        trail.destroy();
+      },
     });
 
-    scene.physics.add.overlap(player.character, trail, () => {
-      if (!player.hasControl) { return }
-      player.setHasControl(false)
-      player.character.setTint(colorWheel.blue)
-      scene.time.delayedCall(750, () => {
-        player.setHasControl(true)
-        player.character.clearTint()
-      })
-    });
+    // Add the trail part to the trailGroup for collision detection
+    this.trailGroup.add(trail);
   }
+
   enemyPlayerCollision = () => {
     if (this.isAttacking) return;
     // TODO figure out why this attack animation isnt playing

@@ -34,6 +34,7 @@ export class SceneOne extends Phaser.Scene {
     this.load.spritesheet('enemy', './assets/Wisp.png', { frameWidth: 32, frameHeight: 32 });
   }
   create() {
+
     player.setScene(this)
     this.dialogBox = new DialogBox(this);
 
@@ -64,7 +65,7 @@ export class SceneOne extends Phaser.Scene {
 
     this.cameras.main.startFollow(player.character);
 
-    enemies.push(new Enemy(this, 3, 100, 1));
+    enemies.push(new Enemy(this, 3, 100, .5));
   }
 
   update() {

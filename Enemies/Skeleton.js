@@ -65,7 +65,7 @@ export default class skeleton extends Enemy {
   }
 
   handleDrop() {
-    if (Math.random() < 0.5 && player.attackVisual.frame.texture.key !== 'shovel') {
+    if (player.attackVisual.frame.texture.key !== 'shovel') {
       let shovel = new Item(this.scene, this.enemy.x, this.enemy.y, 'shovel', 5);
       shovel.setScale(24 / shovel.width);
       this.scene.physics.add.overlap(player.character, shovel, () => {

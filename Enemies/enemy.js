@@ -12,7 +12,7 @@ export default class Enemy {
     this.enemy.setCollideWorldBounds(true);
     this.speed = speed || 100;
     this.originalSpeed = this.speed
-    this.dmg = dmg || 1;
+    this.dmg = dmg ?? 1;
     this.scene = scene;
     this.hp = hp || 1;
     this.slowed = false;
@@ -126,7 +126,12 @@ export default class Enemy {
   }
 
   removeSelf() {
-
+    const index = enemies.findIndex((enemy) => enemy.id === this.id);
+    if (index > -1) {
+      enemies.splice(index, 1);
+    }
+    this.scene.events.off('update', this.updateEnemyMovement, this);
+    this.enemy.destroy();
   }
 
   handleDrop() {
@@ -141,7 +146,10 @@ export default class Enemy {
 
   respawnEnemy(scene) {
     this.scene.time.delayedCall(1000, () => {
-      enemies.push(new Enemy(scene, 3, 100, 1))
+      if (enemies.length > 9) {
+        return
+      }
+      enemies.push(new Enemy(scene, 3, 100, .5))
     });
   }
 }

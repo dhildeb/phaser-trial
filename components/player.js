@@ -292,9 +292,9 @@ class Player {
     if (!isDead) {
       return;
     }
-    if (scene.scene.key == 'SceneOne' && Math.random() < 0.3) {
+    if (enemies.length < 10 && scene.scene.key == 'SceneOne' && Math.random() < 0.3) {
       scene.time.delayedCall(500, () => {
-        enemies.push(new skeleton(scene, 25, 75, 5))
+        enemies.push(new skeleton(scene, 25, 75, 1))
       });
     }
     if (scene.scene.key == 'SceneOne') {
@@ -355,16 +355,18 @@ class Player {
   }
 
   handlePlayerDamaged(dmg) {
+    if (dmg <= 0) { return }
     this.hpBar.setValue(this.hpBar.value - dmg);
     this.character.setTint(colorWheel.red);
-
     this.scene.time.delayedCall(150, () => {
       this.character.clearTint()
     })
     if (this.hpBar.value <= 0) {
-      setGameOver(true);
+      setGameOver(this.scene, true);
       pauseGame()
       this.character.anims.play('turn');
+      this.character.setVelocity(0, 0);
+      this.hasControl = false;
     }
   }
 }

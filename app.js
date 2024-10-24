@@ -2,7 +2,8 @@ import { StartScene } from './scenes/start.js';
 import { SceneOne } from './scenes/level_1.js';
 import { SceneTwo } from './scenes/level_2.js';
 import { EndOneScene } from './scenes/end_1.js';
-import { colorWheel } from "./utils/constants.js";
+import DialogBox from "./components/DialogBox.js";
+import { pauseGame } from "../utils/enemiesHelper.js";
 
 export let viewWidth = $(window).width()
 export let viewHeight = $(window).height()
@@ -75,6 +76,14 @@ export const handleVictory = () => {
   gameOver = true;
 }
 
-export const setGameOver = (gameBool) => {
+export const setGameOver = (scene, gameBool) => {
+  const deadBox = new DialogBox(scene)
+  deadBox.showDialog('You\'re Dead \n\n\n Press \'R\' to try again...');
+  pauseGame()
   gameOver = gameBool;
+  scene.input.keyboard.once('keydown-R', () => {
+    window.location.reload()
+    // enemies.forEach((enemy) => enemy.removeSelf())
+    // scene.scene.restart();
+  });
 }
