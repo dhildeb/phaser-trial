@@ -5,6 +5,7 @@ import { colorWheel, depthMap } from "../utils/constants.js";
 export default class Slime extends Enemy {
   constructor(scene, hp, speed, dmg) {
     super(scene, hp, speed, dmg)
+    this.lastDirectionChange = 0;
   }
 
   configureEnemy() {
@@ -68,14 +69,14 @@ export default class Slime extends Enemy {
   updateEnemyMovement() {
     const distance = Phaser.Math.Distance.Between(player.character.x, player.character.y, this.enemy.x, this.enemy.y);
     if (distance > 512) {
-      this.enemy.setVelocity(0);
-      this.enemy.anims.stop();
+      this.moveRandom()
       return;
     }
-    if (this.enemy.anims.currentAnim && this.enemy.anims.currentAnim.key === 'slime_attack') {
-      console.log(this.enemy.anims.currentAnim)
-      return;
-    }
+    // TODO fix attack animation
+    // if (this.enemy.anims.currentAnim && this.enemy.anims.currentAnim.key === 'slime_attack') {
+    //   console.log(this.enemy.anims.currentAnim)
+    //   return;
+    // }
     const directionX = (player.character.x - this.enemy.x) / distance;
     const directionY = (player.character.y - this.enemy.y) / distance;
 
@@ -87,23 +88,52 @@ export default class Slime extends Enemy {
     this.createTrailPart(this.scene, this.enemy.x, this.enemy.y);
   }
 
-  createTrailPart(scene, x, y) {
-    // Create the trail part using a circle
-    const trail = scene.add.circle(x, y + 4, 6, colorWheel.blue);
-    trail.setAlpha(0.01); // transparency
+  moveRandom() {
+    const currentTime = this.scene.time.now;
 
-    // Add physics to the trail
+    if (currentTime - this.lastDirectionChange > 5000) {
+      this.lastDirectionChange = currentTime;
+
+      const directionX = Phaser.Math.Between(-1, 1);
+      const directionY = Phaser.Math.Between(-1, 1);
+
+      this.enemy.setVelocityX(directionX * this.speed);
+      this.enemy.setVelocityY(directionY * this.speed);
+
+      if (directionX !== 0) {
+        this.enemy.anims.play(directionX > 0 ? 'right_slime' : 'left_slime', true);
+      } else {
+        this.enemy.anims.stop();
+      }
+
+    }
+
+    this.createTrailPart(this.scene, this.enemy.x, this.enemy.y);
+    this.keepEnemyInBounds();
+  }
+
+  keepEnemyInBounds() {
+    if (this.enemy.x < 0 || this.enemy.x > this.scene.physics.world.bounds.width) {
+      this.enemy.setVelocityX(this.enemy.body.velocity.x * -1);
+    }
+    if (this.enemy.y < 0 || this.enemy.y > this.scene.physics.world.bounds.height) {
+      this.enemy.setVelocityY(this.enemy.body.velocity.y * -1);
+    }
+  }
+
+
+  createTrailPart(scene, x, y) {
+    const trail = scene.add.circle(x, y + 4, 6, colorWheel.blue);
+    trail.setAlpha(0.01);
+
     scene.physics.add.existing(trail);
 
-    // Set up physics properties for the trail body
     trail.body.setCircle(6);
     trail.body.setAllowGravity(false);
     trail.body.setImmovable(true);
 
-    // Set trail depth
     trail.setDepth(depthMap.background + 1);
 
-    // Create a tween to slowly fade out and destroy the trail part
     scene.tweens.add({
       targets: trail,
       alpha: { from: .05, to: 0.01 },
@@ -114,7 +144,6 @@ export default class Slime extends Enemy {
       },
     });
 
-    // Add the trail part to the trailGroup for collision detection
     this.trailGroup.add(trail);
   }
 
