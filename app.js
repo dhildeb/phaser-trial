@@ -4,8 +4,8 @@ import { SceneTwo } from './scenes/level_2.js';
 import { EndOneScene } from './scenes/end_1.js';
 import { EndTwoScene } from './scenes/end_2.js';
 import DialogBox from "./components/DialogBox.js";
-import { pauseGame } from "../utils/enemiesHelper.js";
 import { SceneFour } from "./scenes/level_4.js";
+import { pauseGame } from "./utils/enemiesHelper.js";
 
 export let viewWidth = $(window).width()
 export let viewHeight = $(window).height()
