@@ -23,7 +23,7 @@ export class StartScene extends Phaser.Scene {
         dialogText.setText(this.oldManDialog[this.dialogIndex]);
       } else {
         // this.scene.start('SceneOne');
-        this.scene.start('SceneTwo');
+        this.scene.start('EndTwoScene');
       }
     });
   }

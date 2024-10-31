@@ -78,7 +78,6 @@ export class SceneTwo extends Phaser.Scene {
     enemies.push(new Slime(this, 500, 10, 0));
     enemies.push(new Slime(this, 500, 10, 0));
     enemies.push(new Slime(this, 500, 10, 0));
-    enemies.push(new Slime(this, 500, 10, 0));
     const jar = this.physics.add.staticGroup();
     const lightJar = jar.create(worldBounds.x - 50, worldBounds.y - 200, 'jar');
     this.physics.add.overlap(lightJar, player.character, () => {
@@ -141,6 +140,7 @@ export class SceneTwo extends Phaser.Scene {
     if (currentRunes === choosenRune) {
       sessionStorage.setItem('secretName', choosenRune)
       displayRuneText.setText('You did it!')
+      this.scene.start('EndTwoScene')
     }
   }
 

@@ -2,8 +2,10 @@ import { StartScene } from './scenes/start.js';
 import { SceneOne } from './scenes/level_1.js';
 import { SceneTwo } from './scenes/level_2.js';
 import { EndOneScene } from './scenes/end_1.js';
+import { EndTwoScene } from './scenes/end_2.js';
 import DialogBox from "./components/DialogBox.js";
 import { pauseGame } from "../utils/enemiesHelper.js";
+import { SceneFour } from "./scenes/level_4.js";
 
 export let viewWidth = $(window).width()
 export let viewHeight = $(window).height()
@@ -35,7 +37,7 @@ var config = {
     }
   },
   // backgroundColor: colorWheel.gray,
-  scene: [StartScene, SceneOne, EndOneScene, SceneTwo]
+  scene: [StartScene, SceneOne, EndOneScene, SceneTwo, EndTwoScene, SceneFour]
 };
 
 new Phaser.Game(config);

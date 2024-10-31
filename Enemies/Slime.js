@@ -1,4 +1,4 @@
-import Enemy from './enemy.js';
+import Enemy from './Enemy.js';
 import { player } from "../components/player.js";
 import { colorWheel, depthMap } from "../utils/constants.js";
 

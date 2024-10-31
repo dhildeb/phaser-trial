@@ -7,7 +7,6 @@ export class EndTwoScene extends Phaser.Scene {
       'Gonna have to dig deeper to find what yer lookin fer.'
     ];
     this.dialogIndex = 0;
-    this.keyCollected = false;
     this.inputEnabled = false;
     this.key;
   }
@@ -30,17 +29,13 @@ export class EndTwoScene extends Phaser.Scene {
     this.input.keyboard.on('keydown', () => {
       if (!this.inputEnabled) return;
 
-      if (!this.keyCollected) {
-        this.add.image(400, 300, 'coolGuy').setScale(0.2);
+      this.add.image(400, 300, 'coolGuy').setScale(0.2);
+      dialogText.setText(this.oldManDialog[this.dialogIndex]);
+      if (this.dialogIndex < this.oldManDialog.length - 1) {
         dialogText.setText(this.oldManDialog[this.dialogIndex]);
-        this.keyCollected = true;
+        this.dialogIndex++;
       } else {
-        if (this.dialogIndex < this.oldManDialog.length - 1) {
-          dialogText.setText(this.oldManDialog[this.dialogIndex]);
-          this.dialogIndex++;
-        } else {
-          this.scene.start('SceneTwo');
-        }
+        this.scene.start('SceneFour');
       }
     });
   }
