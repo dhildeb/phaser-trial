@@ -4,7 +4,7 @@ import { player } from "../components/player.js";
 import DialogBox from '../components/DialogBox.js';
 import { pauseGame } from '../utils/enemiesHelper.js'
 import { depthMap, headstoneRips } from "../utils/constants.js";
-import Enemy from "../Enemies/Enemy.js";
+import Enemy from "../Enemies/enemy.js";
 
 
 export class SceneOne extends Phaser.Scene {

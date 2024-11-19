@@ -1,4 +1,4 @@
-import Enemy from './Enemy.js';
+import Enemy from './enemy.js';
 import Item from "../components/Item.js";
 import { player } from "../components/player.js";
 import { Items } from "../utils/constants.js";

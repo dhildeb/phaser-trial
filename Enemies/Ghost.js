@@ -1,4 +1,4 @@
-import Enemy from './Enemy.js';
+import Enemy from './enemy.js';
 import { player } from "../components/player.js";
 import { worldBounds } from "../app.js";
 export default class Ghost extends Enemy {
