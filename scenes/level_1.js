@@ -1,10 +1,10 @@
 
 import { createCommonSceneElements, getGridCoordinates, isCellOccupied, markCellsOccupied, tombstones, setTombstones, allTombstones, enemies, gameOver, worldBounds, buildingPositions } from "../app.js";
 import { player } from "../components/player.js";
-import Enemy from "../Enemies/Enemy.js";
 import DialogBox from '../components/DialogBox.js';
 import { pauseGame } from '../utils/enemiesHelper.js'
 import { depthMap, headstoneRips } from "../utils/constants.js";
+import Enemy from "../Enemies/Enemy.js";
 
 
 export class SceneOne extends Phaser.Scene {
