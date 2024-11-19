@@ -3,7 +3,7 @@ import { createCommonSceneElements, setTombstones, gameOver, enemies, worldBound
 import { player } from "../components/player.js";
 import DialogBox from '../components/DialogBox.js';
 import Slime from "../Enemies/Slime.js";
-import Ghost from "../Enemies/ghost.js";
+import Ghost from "../Enemies/Ghost.js";
 
 export class SceneFour extends Phaser.Scene {
   constructor() {
@@ -20,8 +20,8 @@ export class SceneFour extends Phaser.Scene {
     this.load.spritesheet('player', './assets/scared_little_girl.png', { frameWidth: 20, frameHeight: 29 });
     this.load.spritesheet('slime', './assets/slime.png', { frameWidth: 32, frameHeight: 25 });
     this.load.spritesheet('enemy', './assets/Wisp.png', { frameWidth: 32, frameHeight: 32 });
-    worldBounds.x = 4086
-    worldBounds.y = 4086
+    worldBounds.x = 1024//4086
+    worldBounds.y = 1024//4086
   }
   create() {
     player.setScene(this)
@@ -34,7 +34,7 @@ export class SceneFour extends Phaser.Scene {
 
     this.cameras.main.startFollow(player.character);
     enemies.push(new Slime(this, 500, 10, 0));
-    enemies.push(new Ghost(this, 100, player.speed * 2, 0));
+    enemies.push(new Ghost(this, 100, player.speed * 1.5, 0));
   }
 
   update() {
