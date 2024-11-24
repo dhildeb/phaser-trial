@@ -56,7 +56,7 @@ export const headstoneRips = [
 ]
 
 export const Items = {
-  rock: { img: 'rock', xScale: .05, yScale: .05, type: 'wep', dmg: 2 },
+  rock: { img: 'rock', xScale: .02, yScale: .02, type: 'wep', dmg: 2 },
   shovel: { img: 'shovel', xScale: .006857, yScale: .006857, type: 'wep', dmg: 5 },
   torch: { img: 'torch', xScale: .1, yScale: .1, type: 'util', dmg: 0 },
 }
