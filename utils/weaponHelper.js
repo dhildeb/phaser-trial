@@ -49,32 +49,32 @@ export function getWepRangePos(x, y, lastPressedKey, wepType, powerLevel) {
   if (wepType === 'rock') {
     switch (lastPressedKey) {
       case 'up':
-        attackRangeY -= powerLevel;
+        attackRangeY -= powerLevel + 20;
         break;
       case 'down':
-        attackRangeY += powerLevel;
+        attackRangeY += powerLevel + 20;
         break;
       case 'left':
-        attackRangeX -= powerLevel;
+        attackRangeX -= powerLevel + 20;
         break;
       case 'right':
-        attackRangeX += powerLevel;
+        attackRangeX += powerLevel + 20;
         break;
       case 'upleft':
-        attackRangeX -= powerLevel;
-        attackRangeY -= powerLevel;
+        attackRangeX -= powerLevel + 20;
+        attackRangeY -= powerLevel + 20;
         break;
       case 'upright':
-        attackRangeX += powerLevel;
-        attackRangeY -= powerLevel;
+        attackRangeX += powerLevel + 20;
+        attackRangeY -= powerLevel + 20;
         break;
       case 'downleft':
-        attackRangeX -= powerLevel;
-        attackRangeY += powerLevel;
+        attackRangeX -= powerLevel + 20;
+        attackRangeY += powerLevel + 20;
         break;
       case 'downright':
-        attackRangeX += powerLevel;
-        attackRangeY += powerLevel;
+        attackRangeX += powerLevel + 20;
+        attackRangeY += powerLevel + 20;
         break;
     }
     return { attackRangeX, attackRangeY }

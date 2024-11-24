@@ -28,7 +28,7 @@ export class SceneFour extends Phaser.Scene {
     this.load.spritesheet('slime', './assets/slime.png', { frameWidth: 32, frameHeight: 25 });
     this.load.spritesheet('enemy', './assets/Wisp.png', { frameWidth: 32, frameHeight: 32 });
     worldBounds.x = 1024
-    worldBounds.y = 1024
+    worldBounds.y = 512
   }
   create() {
     player.setScene(this)

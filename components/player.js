@@ -199,6 +199,7 @@ class Player {
     this.attackVisual = scene.physics.add.sprite(wepStartX, wepStartY, this.wep.img);
     this.attackVisual.setVisible(true);
     this.attackVisual.setScale(this.wep.xScale, this.wep.yScale);
+    this.attackVisual.body.setSize(1, 1);
     const isWepShovel = this.wep.img === 'shovel';
     if (isWepShovel) {
       this.attackVisual.setRotation(directionAngles[this.lastPressedKey]);
@@ -220,7 +221,7 @@ class Player {
       scene.tweens.add({
         targets: trail,
         alpha: 0, // Fade out
-        duration: 100, // Adjust duration for the trail fade
+        duration: 50, // Adjust duration for the trail fade
         onComplete: () => trail.destroy(),
       });
     };

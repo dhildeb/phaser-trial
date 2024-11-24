@@ -4,6 +4,12 @@ import { player } from "../components/player.js";
 export default class Ghost extends Enemy {
   constructor(scene, hp, speed, dmg) {
     super(scene, hp, speed, dmg);
+    this.timerEvent = this.scene.time.addEvent({
+      delay: 250,
+      callback: this.updateMovement,
+      callbackScope: this,
+      loop: true
+    });
   }
 
   configureEnemy() {
@@ -21,7 +27,7 @@ export default class Ghost extends Enemy {
   }
 
   updateEnemyMovement() {
-
+    // overridding basic enemy movement patter
   }
 
   updateMovement() {
